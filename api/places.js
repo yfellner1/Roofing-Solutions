@@ -19,12 +19,12 @@ async function googleAsk(q, token, area) {
   return (d.suggestions || []).map((s) => s.placePrediction).filter((p) => p?.text?.text && p.placeId).slice(0, 6)
     .map((p) => ({ label: strip(p.text.text), id: p.placeId }));
 }
-// Looks only within roughly 100 miles of the shop first, so a common street name
-// doesn't bring up other states; widens to the whole country if that finds nothing.
+// Looks close to the shop first (about 25 miles), then about 100 miles, then the whole
+// country, so a common street name brings up the local one before other states.
 async function google(q, near, token) {
-  if (near) {
+  for (const [dLat, dLng] of near ? [[0.4, 0.5], [1.5, 2]] : []) {
     const local = await googleAsk(q, token, { locationRestriction: { rectangle: {
-      low: { latitude: near.lat - 1.5, longitude: near.lng - 2 }, high: { latitude: near.lat + 1.5, longitude: near.lng + 2 } } } });
+      low: { latitude: near.lat - dLat, longitude: near.lng - dLng }, high: { latitude: near.lat + dLat, longitude: near.lng + dLng } } } });
     if (local.length) return local;
   }
   return googleAsk(q, token, {});
