@@ -1455,18 +1455,28 @@ function attachSuggest(input,box,onPick){
 }
 // Address lookup while typing. onPick gets {label, lat?, lng?}.
 function attachAddress(input,box,onPick){
-  let timer=null,seq=0;
+  let timer=null,seq=0,tok="";
+  const newTok=()=>{tok=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2)};newTok();
   const hide=()=>{box.hidden=true;box.replaceChildren()};
+  // Google suggestions come without ZIP or map point; fetch those for the one that was picked.
+  const pick=async h=>{
+    seq++;input.value=h.label;hide();
+    if(!h.id){if(onPick)onPick(h);return}
+    const t=tok;newTok();
+    try{const r=await fetch("/api/places?id="+encodeURIComponent(h.id)+"&s="+t,{credentials:"same-origin"});const d=await r.json();
+      if(d&&d.result&&d.result.label&&input.value===h.label){input.value=d.result.label;h=d.result}}catch(e){}
+    if(onPick&&input.value===h.label)onPick(h);
+  };
   input.addEventListener("input",()=>{
     clearTimeout(timer);const q=input.value.trim(),mine=++seq;
     if(q.length<4)return hide();
     timer=setTimeout(async()=>{
-      const s=S();let u="/api/places?q="+encodeURIComponent(q);
+      const s=S();let u="/api/places?q="+encodeURIComponent(q)+"&s="+tok;
       if(typeof s.shopLat==="number"&&typeof s.shopLng==="number")u+="&lat="+s.shopLat+"&lng="+s.shopLng;
       let d;try{const r=await fetch(u,{credentials:"same-origin"});d=await r.json()}catch(e){return}
       if(mine!==seq||document.activeElement!==input)return;
       const hits=(d&&d.results)||[];if(!hits.length)return hide();
-      box.replaceChildren(...hits.map(h=>el("button",{type:"button",onpointerdown:e=>{e.preventDefault();seq++;input.value=h.label;hide();if(onPick)onPick(h)}},h.label)));box.hidden=false;
+      box.replaceChildren(...hits.map(h=>el("button",{type:"button",onpointerdown:e=>{e.preventDefault();pick(h)}},h.label)));box.hidden=false;
     },280);
   });
   input.addEventListener("blur",()=>setTimeout(hide,200));

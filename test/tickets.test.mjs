@@ -15,6 +15,11 @@ globalThis.fetch = async (url, opts) => {
     { geometry: { coordinates: [2.3, 48.8] }, properties: { countrycode: 'FR', street: 'Rue Maple', city: 'Paris' } },
     { geometry: { coordinates: [-74.0, 41.0] }, properties: { countrycode: 'US', name: 'Maple Avenue', city: 'Suffern', state: 'New York', type: 'street' } },
   ] }));
+  if (url.includes('places.googleapis.com/v1/places:autocomplete')) {
+    const b = JSON.parse(opts.body);
+    return new Response(JSON.stringify({ suggestions: b.locationRestriction ? [] : [{ placePrediction: { placeId: 'pid_1', text: { text: '14 Maple Ave, Monsey, NY, USA' } } }] }));
+  }
+  if (url.includes('places.googleapis.com/v1/places/pid_1')) return new Response(JSON.stringify({ formattedAddress: '14 Maple Ave, Monsey, NY 10952, USA', location: { latitude: 41.1, longitude: -74.07 } }));
   if (url.includes('api.twilio.com')) { sent.push(Object.fromEntries(opts.body)); return new Response(JSON.stringify({ sid: 'SM1' }), { status: 201 }); }
   throw new Error('unexpected fetch ' + url);
 };
@@ -125,6 +130,11 @@ const { default: places } = await import('../api/places.js');
 assert.equal((await places.fetch(new Request('https://x/api/places?q=14+maple'))).status, 401);
 const pl = await (await places.fetch(new Request('https://x/api/places?q=14+maple', { headers: { cookie } }))).json();
 assert.deepEqual(pl.results, [{ label: '14 Maple Avenue, Monsey, NY 10952', lat: 41.11, lng: -74.07 }, { label: '14 Maple Avenue, Suffern, NY' }], 'US only, formatted, typed number kept when the map lacks it');
+process.env.GOOGLE_MAPS_KEY = 'k';
+const gq = (qs) => places.fetch(new Request('https://x/api/places?' + qs, { headers: { cookie } })).then((x) => x.json());
+assert.deepEqual((await gq('q=14+maple&lat=41.1&lng=-74')).results, [{ label: '14 Maple Ave, Monsey, NY', id: 'pid_1' }], 'Google: nothing nearby widens the search');
+assert.deepEqual((await gq('id=pid_1&s=abc')).result, { label: '14 Maple Ave, Monsey, NY 10952', lat: 41.1, lng: -74.07 }, 'picked suggestion gets ZIP + map point');
+delete process.env.GOOGLE_MAPS_KEY;
 r = await post({ op: 'ticketCreate', data: { kind: 'repair', customer: { name: 'Geo Pick' }, address: 'Nowhere Known Rd', geo: { address: 'Nowhere Known Rd', lat: 40.5, lng: -74.5 } } });
 assert.equal(r.board.tickets[r.result.id].lat, 40.5, 'picked suggestion supplies the map point');
 

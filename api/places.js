@@ -5,17 +5,39 @@ import { json, getUser } from './_lib.js';
 
 const ST = { Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR', California: 'CA', Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE', 'District of Columbia': 'DC', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI', Idaho: 'ID', Illinois: 'IL', Indiana: 'IN', Iowa: 'IA', Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA', Maine: 'ME', Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN', Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE', Nevada: 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH', Oklahoma: 'OK', Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX', Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA', 'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY' };
 
-async function google(q, near) {
-  const body = { input: q, includedRegionCodes: ['us'] };
-  if (near) body.locationBias = { circle: { center: { latitude: near.lat, longitude: near.lng }, radius: 50000 } };
-  const r = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+const G = 'https://places.googleapis.com/v1/places';
+const strip = (t) => String(t || '').replace(/, (USA|United States)$/, '');
+
+async function googleAsk(q, token, area) {
+  const body = { input: q, includedRegionCodes: ['us'], ...(token ? { sessionToken: token } : {}), ...area };
+  const r = await fetch(G + ':autocomplete', {
     method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GOOGLE_MAPS_KEY },
     body: JSON.stringify(body), signal: AbortSignal.timeout(4000),
   });
   if (!r.ok) throw new Error('places ' + r.status);
   const d = await r.json();
-  return (d.suggestions || []).map((s) => s.placePrediction?.text?.text).filter(Boolean).slice(0, 6)
-    .map((t) => ({ label: t.replace(/, (USA|United States)$/, '') }));
+  return (d.suggestions || []).map((s) => s.placePrediction).filter((p) => p?.text?.text && p.placeId).slice(0, 6)
+    .map((p) => ({ label: strip(p.text.text), id: p.placeId }));
+}
+// Looks only within roughly 100 miles of the shop first, so a common street name
+// doesn't bring up other states; widens to the whole country if that finds nothing.
+async function google(q, near, token) {
+  if (near) {
+    const local = await googleAsk(q, token, { locationRestriction: { rectangle: {
+      low: { latitude: near.lat - 1.5, longitude: near.lng - 2 }, high: { latitude: near.lat + 1.5, longitude: near.lng + 2 } } } });
+    if (local.length) return local;
+  }
+  return googleAsk(q, token, {});
+}
+// The chosen suggestion's full address (with ZIP) and exact map point.
+async function googleDetails(id, token) {
+  const r = await fetch(G + '/' + encodeURIComponent(id) + (token ? '?sessionToken=' + encodeURIComponent(token) : ''), {
+    headers: { 'x-goog-api-key': process.env.GOOGLE_MAPS_KEY, 'x-goog-fieldmask': 'formattedAddress,location' }, signal: AbortSignal.timeout(4000),
+  });
+  if (!r.ok) throw new Error('place ' + r.status);
+  const d = await r.json();
+  const lat = d.location?.latitude, lng = d.location?.longitude;
+  return { label: strip(d.formattedAddress), ...(Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : {}) };
 }
 
 async function photon(q, near) {
@@ -49,12 +71,18 @@ export default {
   async fetch(request) {
     if (!getUser(request)) return json({ error: 'Sign in required' }, 401);
     const url = new URL(request.url);
+    const token = (url.searchParams.get('s') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 36);
+    const id = (url.searchParams.get('id') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 300);
+    if (id) {
+      if (!process.env.GOOGLE_MAPS_KEY) return json({ result: null });
+      try { return json({ result: await googleDetails(id, token) }); } catch (e) { console.warn(e.message); return json({ result: null }); }
+    }
     const q = (url.searchParams.get('q') || '').trim().slice(0, 200);
     if (q.length < 4) return json({ results: [] });
     const lat = parseFloat(url.searchParams.get('lat')), lng = parseFloat(url.searchParams.get('lng'));
     const near = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
     try {
-      if (process.env.GOOGLE_MAPS_KEY) { try { return json({ results: await google(q, near) }); } catch (e) { console.warn(e.message); } }
+      if (process.env.GOOGLE_MAPS_KEY) { try { return json({ results: await google(q, near, token) }); } catch (e) { console.warn(e.message); } }
       return json({ results: await photon(q, near) });
     } catch (e) {
       return json({ results: [] });
