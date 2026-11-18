@@ -10,6 +10,11 @@ globalThis.fetch = async (url, opts) => {
     return new Response(JSON.stringify({ result: { addressMatches: c ? [{ coordinates: { y: c[0], x: c[1] } }] : [] } }));
   }
   if (url.includes('nominatim')) return new Response('[]');
+  if (url.includes('photon.komoot.io')) return new Response(JSON.stringify({ features: [
+    { geometry: { coordinates: [-74.07, 41.11] }, properties: { countrycode: 'US', housenumber: '14', street: 'Maple Avenue', city: 'Monsey', state: 'New York', postcode: '10952', type: 'house' } },
+    { geometry: { coordinates: [2.3, 48.8] }, properties: { countrycode: 'FR', street: 'Rue Maple', city: 'Paris' } },
+    { geometry: { coordinates: [-74.0, 41.0] }, properties: { countrycode: 'US', name: 'Maple Avenue', city: 'Suffern', state: 'New York', type: 'street' } },
+  ] }));
   if (url.includes('api.twilio.com')) { sent.push(Object.fromEntries(opts.body)); return new Response(JSON.stringify({ sid: 'SM1' }), { status: 201 }); }
   throw new Error('unexpected fetch ' + url);
 };
@@ -114,6 +119,14 @@ assert.equal(sent[n].Body, 'Custom words');
 assert.equal(r.board.tickets[mid].reminder.status, 'sent');
 r = await post({ op: 'ticketSchedule', id: mid, date: addDays(tomorrow, 1), time: '', assignee: '' });
 assert.equal(r.board.tickets[mid].reminder, null, 'rescheduling clears the reminder so a new one goes out');
+
+// --- address suggestions
+const { default: places } = await import('../api/places.js');
+assert.equal((await places.fetch(new Request('https://x/api/places?q=14+maple'))).status, 401);
+const pl = await (await places.fetch(new Request('https://x/api/places?q=14+maple', { headers: { cookie } }))).json();
+assert.deepEqual(pl.results, [{ label: '14 Maple Avenue, Monsey, NY 10952', lat: 41.11, lng: -74.07 }, { label: '14 Maple Avenue, Suffern, NY' }], 'US only, formatted, typed number kept when the map lacks it');
+r = await post({ op: 'ticketCreate', data: { kind: 'repair', customer: { name: 'Geo Pick' }, address: 'Nowhere Known Rd', geo: { address: 'Nowhere Known Rd', lat: 40.5, lng: -74.5 } } });
+assert.equal(r.board.tickets[r.result.id].lat, 40.5, 'picked suggestion supplies the map point');
 
 // --- cleanup rules
 assert.ok((await post({ op: 'customerDelete', id: r.board.tickets[mid].customerId })).error);

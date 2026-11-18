@@ -21,6 +21,7 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 - `api/_tickets.js` — all ticket / customer / settings / route actions (called from `op.js`), the stage rules, and the task↔ticket automations. Runs inside `mutate()`, so it is synchronous.
 - `api/_geo.js`  — address → lat/lng (US Census geocoder, OpenStreetMap fallback, no key) and `bestRoute` (nearest-neighbour + 2-opt).
 - `api/_sms.js`  — Twilio REST call + reminder message builder.
+- `api/places.js` — address suggestions while typing (GET `?q=`). Google Places if `GOOGLE_MAPS_KEY` is set, else free Photon (OpenStreetMap). A picked suggestion sends its lat/lng with the ticket (`data.geo`) so no second lookup is needed.
 - `api/remind.js` — GET = nightly cron (see `vercel.json`, needs `CRON_SECRET`), POST = preview/send one reminder.
 - `test/dev.mjs` — `npm run preview`: whole app on localhost with in-memory storage (safe; never touches live data).
 

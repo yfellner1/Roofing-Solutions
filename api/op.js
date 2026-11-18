@@ -14,7 +14,10 @@ async function prepare(b) {
         const old = (await readDb()).db.tickets[b.id];
         if (old && old.address === address && old.lat != null) return pre;
       }
-      pre.geoAddr = address; pre.geo = await geocode(address);
+      // An address picked from the suggestion list already comes with its map point.
+      const g = d.geo;
+      const picked = g && g.address === address && Number.isFinite(g.lat) && Number.isFinite(g.lng) && Math.abs(g.lat) <= 90 && Math.abs(g.lng) <= 180;
+      pre.geoAddr = address; pre.geo = picked ? { lat: g.lat, lng: g.lng } : await geocode(address);
     } else if (b.op === 'settings') {
       const address = str(b.data?.shopAddress, 300);
       const cur = getSettings((await readDb()).db);

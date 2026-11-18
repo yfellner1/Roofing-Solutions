@@ -539,7 +539,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
       <div class="field"><label for="iEmail">Email</label><input id="iEmail" type="email" autocomplete="off"></div>
       <div class="field"><label for="iDue">Due date</label><input id="iDue" type="date"></div>
     </div>
-    <div class="field"><label for="iAddress">Job site address</label><input id="iAddress" type="text" autocomplete="off" placeholder="Street, town, ZIP"></div>
+    <div class="field suggest-wrap"><label for="iAddress">Job site address</label><input id="iAddress" type="text" autocomplete="off" placeholder="Street, town, ZIP"><div class="suggest" id="iAddrSuggest" hidden></div></div>
     <div class="field"><label for="iDesc">Task description</label><textarea id="iDesc" placeholder="What needs to happen?"></textarea></div>
     <div class="field" id="photoPick"><span class="lab">Photos <span class="hint">(you can add more later)</span></span>
       <div class="photos" id="pendingPhotos"></div>
@@ -585,7 +585,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
         <div class="field"><span class="lab">Text reminders</span><label class="check" style="min-height:44px"><input type="checkbox" id="tSmsOk" checked> OK to text this customer</label></div>
       </div>
     </div>
-    <div class="field"><label for="tAddress">Job site address <span class="hint">(used for the map and the route)</span></label><input id="tAddress" type="text" autocomplete="off" placeholder="Street, town, state, ZIP"></div>
+    <div class="field suggest-wrap"><label for="tAddress">Job site address <span class="hint">(start typing – pick the match so the map and route are exact)</span></label><input id="tAddress" type="text" autocomplete="off" placeholder="Street, town, state, ZIP"><div class="suggest" id="tAddrSuggest" hidden></div></div>
     <div class="field"><label for="tDesc">What's needed</label><textarea id="tDesc" placeholder="Describe the problem or the work"></textarea></div>
     <div class="field"><label for="tAmount">Amount <span class="hint">(optional – estimate or job price)</span></label><input id="tAmount" type="text" inputmode="decimal" placeholder="$0.00"></div>
     <div class="group">
@@ -1313,7 +1313,7 @@ async function openReminder(t){
 function openCustomerForm(c){
   const n=inp("mcName","text",c&&c.name),p=inp("mcPhone","tel",c&&c.phone),e=inp("mcEmail","email",c&&c.email),a=inp("mcAddr","text",c&&c.address,{placeholder:"Street, town, state, ZIP"}),no=area("mcNotes",c&&c.notes,"Gate codes, dogs, preferences, who to ask for…");
   const ok=chk("mcSms","OK to text this customer",!c||c.smsOk!==false),err=el("div",{class:"err",role:"alert"});
-  openMini(c?"Edit customer":"New customer",[fld("Name",n),el("div",{class:"grid2"},fld("Mobile phone",p),fld("Email",e)),fld("Address",a),fld("Notes",no),ok,err],
+  openMini(c?"Edit customer":"New customer",[fld("Name",n),el("div",{class:"grid2"},fld("Mobile phone",p),fld("Email",e)),addrField("Address",a),fld("Notes",no),ok,err],
     [c&&!tickets.some(t=>t.customerId===c.id)?btn("Delete","danger",async()=>{if(!confirm("Delete "+c.name+"?"))return;await op({op:"customerDelete",id:c.id});closeMini();closeDetail()}):null,
      btn("Cancel","",closeMini),
      btn(c?"Save changes":"Save customer","primary",async()=>{if(!n.value.trim()){err.textContent="Enter the customer's name.";return}
@@ -1327,7 +1327,7 @@ function openSettings(){
   const days=el("div",{class:"toggle-row"},...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>{const c=el("input",{type:"checkbox",name:"msSkip",value:String(i)});c.checked=s.skipDays.includes(i);return el("label",{class:"toggle"},c,el("span",null,d))}));
   const tpl=area("msTpl",s.smsTemplate);tpl.style.minHeight="120px";
   openMini("Settings",[
-    fld("Shop address",shop,"(where routes start)"),fld("Company phone",ph,"(shown in reminder texts)"),
+    addrField("Shop address",shop,"(where routes start)"),fld("Company phone",ph,"(shown in reminder texts)"),
     auto,fld("Automatic office tasks go to",who),
     el("p",{class:"group-title",style:"margin-top:8px"},"Reminder texts"),
     el("p",{class:"panel-note"},smsReady?"Texting is connected.":"Texting isn't connected yet (needs a Twilio account – see the README). Until then, Text reminder opens your own phone's Messages app."),
@@ -1453,12 +1453,36 @@ function attachSuggest(input,box,onPick){
   });
   input.addEventListener("blur",()=>setTimeout(hide,200));
 }
+// Address lookup while typing. onPick gets {label, lat?, lng?}.
+function attachAddress(input,box,onPick){
+  let timer=null,seq=0;
+  const hide=()=>{box.hidden=true;box.replaceChildren()};
+  input.addEventListener("input",()=>{
+    clearTimeout(timer);const q=input.value.trim(),mine=++seq;
+    if(q.length<4)return hide();
+    timer=setTimeout(async()=>{
+      const s=S();let u="/api/places?q="+encodeURIComponent(q);
+      if(typeof s.shopLat==="number"&&typeof s.shopLng==="number")u+="&lat="+s.shopLat+"&lng="+s.shopLng;
+      let d;try{const r=await fetch(u,{credentials:"same-origin"});d=await r.json()}catch(e){return}
+      if(mine!==seq||document.activeElement!==input)return;
+      const hits=(d&&d.results)||[];if(!hits.length)return hide();
+      box.replaceChildren(...hits.map(h=>el("button",{type:"button",onpointerdown:e=>{e.preventDefault();seq++;input.value=h.label;hide();if(onPick)onPick(h)}},h.label)));box.hidden=false;
+    },280);
+  });
+  input.addEventListener("blur",()=>setTimeout(hide,200));
+}
+// For inputs built on the fly (customer + settings dialogs): wraps the field so the list can sit under it.
+function addrField(label,input,hint){const f=fld(label,input,hint);f.classList.add("suggest-wrap");const box=el("div",{class:"suggest",hidden:true});f.append(box);attachAddress(input,box);return f}
+let tGeo=null;
+attachAddress($("#tAddress"),$("#tAddrSuggest"),h=>{tGeo=typeof h.lat==="number"?{address:h.label,lat:h.lat,lng:h.lng}:null});
+$("#tAddress").addEventListener("input",()=>{tGeo=null});
+attachAddress($("#iAddress"),$("#iAddrSuggest"));
 function fillTicketCustomer(c){tCustId=c.id;$("#tCustomer").value=c.name||"";$("#tPhone").value=c.phone||"";$("#tEmail").value=c.email||"";$("#tSmsOk").checked=c.smsOk!==false;if(!$("#tAddress").value)$("#tAddress").value=c.address||""}
 attachSuggest($("#tCustomer"),$("#tSuggest"),fillTicketCustomer);
 $("#tCustomer").addEventListener("input",()=>{if(!tEditing)tCustId=""});
 function openTicketForm(t,pre){
   if(!requireMe())return;
-  pre=pre||{};tEditing=t?t.id:null;tCustId=t?t.customerId||"":"";tFromTask=pre.task?pre.task.id:"";
+  pre=pre||{};tGeo=null;tEditing=t?t.id:null;tCustId=t?t.customerId||"":"";tFromTask=pre.task?pre.task.id:"";
   $("#tTitle").textContent=t?"Edit ticket "+tnum(t):"New ticket";$("#tSave").textContent=t?"Save changes":"Create ticket";
   const c=t?cust(t.customerId):pre.customer||{},k=pre.task||{};
   setRadio("tkind",t?t.kind:k.kind==="Repair"?"repair":k.kind==="Installation"?"installation":k.type==="estimate"?"estimate":"");
@@ -1476,7 +1500,7 @@ $("#tClose").onclick=closeTicketForm;$("#tCancel").onclick=closeTicketForm;$("#o
 $("#tSave").onclick=async()=>{
   const data={kind:getRadio("tkind"),trades:[...document.querySelectorAll('input[name="ttrade"]:checked')].map(i=>i.value),
     customerId:tCustId,customer:{name:$("#tCustomer").value,phone:$("#tPhone").value,email:$("#tEmail").value,smsOk:$("#tSmsOk").checked},
-    address:$("#tAddress").value,description:$("#tDesc").value,amount:$("#tAmount").value,date:$("#tDate").value,time:$("#tTime").value,assignee:$("#tAssignee").value,fromTaskId:tFromTask};
+    address:$("#tAddress").value,description:$("#tDesc").value,amount:$("#tAmount").value,date:$("#tDate").value,time:$("#tTime").value,assignee:$("#tAssignee").value,fromTaskId:tFromTask,geo:tGeo};
   const miss=[];if(!data.kind)miss.push("choose estimate, repair or installation");if(!data.customer.name.trim())miss.push("enter the customer's name");
   if(miss.length){$("#tErr").textContent="Please "+miss.join(" and ")+".";return}
   $("#tSave").disabled=true;
