@@ -1,4 +1,35 @@
-import { json, getUser, mutate, PEOPLE, TYPES, STATUSES, uid, str, addActivity, removeBlob } from './_lib.js';
+import { json, getUser, mutate, readDb, getSettings, PEOPLE, TYPES, STATUSES, uid, str, addActivity, removeBlob } from './_lib.js';
+import { ticketOp, advanceFromTask } from './_tickets.js';
+import { geocode } from './_geo.js';
+
+// Address lookups talk to the network, so they happen before the save, never inside it.
+async function prepare(b) {
+  const pre = {};
+  try {
+    if (b.op === 'ticketCreate' || b.op === 'ticketUpdate') {
+      const d = b.data || {};
+      const address = str(d.address, 300) || (b.op === 'ticketCreate' ? str(d.customer?.address, 300) : '');
+      if (!address) return pre;
+      if (b.op === 'ticketUpdate') {
+        const old = (await readDb()).db.tickets[b.id];
+        if (old && old.address === address && old.lat != null) return pre;
+      }
+      pre.geoAddr = address; pre.geo = await geocode(address);
+    } else if (b.op === 'settings') {
+      const address = str(b.data?.shopAddress, 300);
+      const cur = getSettings((await readDb()).db);
+      if (address && !(cur.shopAddress === address && cur.shopLat != null)) { pre.geoAddr = address; pre.geo = await geocode(address); }
+    } else if (b.op === 'route') {
+      const { db } = await readDb();
+      const s = getSettings(db);
+      if (s.shopAddress && s.shopLat == null) { const g = await geocode(s.shopAddress); pre.shop = { address: s.shopAddress, lat: g?.lat ?? null, lng: g?.lng ?? null }; }
+      const todo = Object.entries(db.tickets).filter(([, t]) => t.date === b.date && t.address && t.lat == null).slice(0, 15);
+      pre.geos = {};
+      await Promise.all(todo.map(async ([id, t]) => { const g = await geocode(t.address); pre.geos[id] = { address: t.address, lat: g?.lat ?? null, lng: g?.lng ?? null }; }));
+    }
+  } catch (e) { console.warn('prepare failed', e); }
+  return pre;
+}
 
 const pick = (v, allowed) => (allowed.includes(v) ? v : '');
 
@@ -35,6 +66,7 @@ export default {
     let b;
     try { b = await request.json(); } catch { return json({ error: 'Bad request' }, 400); }
     const blobsToDelete = [];
+    const pre = await prepare(b);
 
     try {
       const { db, result } = await mutate((db) => {
@@ -43,10 +75,12 @@ export default {
           case 'create': {
             const t = cleanTask(b.data || {});
             if (!t.type || !t.assignee) return { error: 'Task type and assigned person are required.' };
+            t.ticketId = db.tickets[b.data?.ticketId] ? b.data.ticketId : '';
             const id = uid();
             db.seq = (db.seq || 0) + 1;
             db.tasks[id] = { ...t, status: 'todo', createdBy: by, createdAt: now, updatedAt: now, number: db.seq };
             addActivity(db, id, by, 'created this task and assigned it to ' + t.assignee);
+            if (t.ticketId) addActivity(db, t.ticketId, by, 'added task #' + db.seq + ' for ' + t.assignee);
             return { id, number: db.seq };
           }
           case 'update': {
@@ -54,6 +88,7 @@ export default {
             if (!old) return { error: 'That task no longer exists.' };
             const t = cleanTask(b.data || {});
             if (!t.type || !t.assignee) return { error: 'Task type and assigned person are required.' };
+            t.ticketId = db.tickets[b.data?.ticketId] ? b.data.ticketId : (db.tickets[old.ticketId] && b.data?.ticketId === undefined ? old.ticketId : '');
             db.tasks[b.id] = { ...old, ...t, updatedAt: now };
             addActivity(db, b.id, by, old.assignee !== t.assignee ? 'reassigned this to ' + t.assignee : 'edited the task details');
             return { id: b.id };
@@ -64,12 +99,13 @@ export default {
             if (!STATUSES[b.status] || old.status === b.status) return { id: b.id };
             old.status = b.status; old.updatedAt = now;
             addActivity(db, b.id, by, 'moved this to ' + STATUSES[b.status]);
+            if (b.status === 'done' && old.ticketId) advanceFromTask(db, old, by);
             return { id: b.id };
           }
           case 'note': {
-            const task = db.tasks[b.id];
+            const task = db.tasks[b.id] || db.tickets[b.id];
             const text = str(b.text, 6000);
-            if (!task) return { error: 'That task no longer exists.' };
+            if (!task) return { error: 'That no longer exists.' };
             if (!text) return { error: 'Write a note first.' };
             db.notes[uid()] = { taskId: b.id, by, at: now, text, kind: 'note' };
             task.updatedAt = now;
@@ -87,11 +123,15 @@ export default {
             if (!p) return { id: b.photoId };
             blobsToDelete.push(p.path);
             delete db.photos[b.photoId];
-            if (db.tasks[p.taskId]) addActivity(db, p.taskId, by, 'removed a photo');
+            if (db.tasks[p.taskId] || db.tickets[p.taskId]) addActivity(db, p.taskId, by, 'removed a photo');
             return { id: b.photoId };
           }
-          default:
-            return { error: 'Unknown action.' };
+          default: {
+            const r = ticketOp(db, b, by, pre);
+            if (r === undefined) return { error: 'Unknown action.' };
+            if (r.blobs) { blobsToDelete.push(...r.blobs); delete r.blobs; }
+            return r;
+          }
         }
       });
       for (const p of blobsToDelete) await removeBlob(p);

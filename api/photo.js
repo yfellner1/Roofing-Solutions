@@ -37,7 +37,7 @@ export default {
     await put(path, buf, { access: 'private', contentType: ctype, addRandomSuffix: false });
     try {
       const { db, result } = await mutate((db) => {
-        if (!db.tasks[taskId]) return { error: 'That task no longer exists.' };
+        if (!db.tasks[taskId] && !db.tickets[taskId]) return { error: 'That no longer exists.' };
         db.photos[id] = { taskId, by, at: Date.now(), path };
         addActivity(db, taskId, by, 'added a photo');
         return { id };

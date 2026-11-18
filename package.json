@@ -4,5 +4,9 @@
   "type": "module",
   "dependencies": {
     "@vercel/blob": "2.8.0"
+  },
+  "scripts": {
+    "test": "node test/run.mjs",
+    "preview": "node test/dev.mjs"
   }
 }

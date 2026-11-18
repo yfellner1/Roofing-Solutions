@@ -2,7 +2,24 @@ import { get, put, del, head, BlobPreconditionFailedError, BlobNotFoundError } f
 import crypto from 'node:crypto';
 
 export const PEOPLE = ['Loriale', 'Mayer', 'Mrs. Salcer', 'Ben', 'Mr. Klein', 'Yehuda'];
-export const TYPES = ['schedule', 'estimate', 'invoice', 'check', 'followup', 'deposit', 'other'];
+export const TYPES = ['schedule', 'estimate', 'estfollow', 'invoice', 'check', 'followup', 'deposit', 'other'];
+export const TRADES = ['roof', 'gutters', 'siding'];
+export const TICKET_KINDS = { estimate: 'Estimate', repair: 'Repair', installation: 'Installation' };
+// Pipelines. Jobs (repairs + installations) and estimates each have their own stages.
+export const JOB_STAGES = { ticket: 'Needs scheduling', scheduled: 'Scheduled', completed: 'Completed', billed: 'Billed', paid: 'Paid / closed' };
+export const EST_STAGES = { ticket: 'Needs scheduling', scheduled: 'Scheduled', visited: 'Visited', sent: 'Estimate sent', followup: 'Needs follow-up', won: 'Won', lost: 'Lost' };
+export const stagesFor = (kind) => (kind === 'estimate' ? EST_STAGES : JOB_STAGES);
+
+export const DEFAULT_SMS = "Hi {first}, this is Roofing Solutions. A reminder that we're scheduled to come out {when}{time} for your {service} at {address}. Questions? Call or text {company_phone}.";
+const SETTINGS = { shopAddress: '', shopLat: null, shopLng: null, companyPhone: '', smsTemplate: DEFAULT_SMS, autoSms: true, skipDays: [], autoTasks: true, officeAssignee: 'Loriale' };
+export const getSettings = (db) => ({ ...SETTINGS, ...(db.settings || {}) });
+
+// Dates are plain YYYY-MM-DD strings in the business's own time zone.
+export const TZ = () => process.env.BUSINESS_TZ || 'America/New_York';
+export const isYmd = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '');
+export const todayYmd = (now = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+export const addDays = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+export const weekday = (ymd) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
 export const STATUSES = { todo: 'To do', progress: 'In progress', waiting: 'Waiting on customer', done: 'Done' };
 const DB_PATH = 'db/board.json';
 
@@ -46,7 +63,7 @@ export function getUser(request) {
   return same(m[2], sign(name, pin)) ? name : '';
 }
 
-const empty = () => ({ seq: 0, tasks: {}, notes: {}, photos: {} });
+const empty = () => ({ seq: 0, tseq: 0, tasks: {}, notes: {}, photos: {}, customers: {}, tickets: {}, settings: {} });
 
 const norm = (e) => String(e || '').replace(/^W\//, '').replace(/"/g, '');
 

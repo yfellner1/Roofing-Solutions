@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Roofing Solutions – Task Board</title>
+<title>Roofing Solutions – Office Board</title>
 <meta name="theme-color" content="#A8252B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -259,6 +259,88 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .who-card small{color:var(--muted)}
 .steps{margin:0;padding-left:20px}
 .steps li{margin-bottom:10px}
+
+/* ---------- Jobs & Estimates ---------- */
+[hidden]{display:none!important}
+.maintabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:4px}
+.maintabs button{border:0;background:transparent;border-radius:7px;padding:8px 16px;font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.2px;color:var(--ink-2);display:flex;align-items:center;gap:8px;min-height:40px;white-space:nowrap}
+.maintabs button[aria-selected="true"]{background:var(--red);color:var(--red-ink)}
+.count{background:var(--red);color:#fff;border-radius:999px;padding:0 7px;font-size:12px;line-height:18px;font-family:var(--body);font-weight:700}
+.maintabs button[aria-selected="true"] .count{background:#fff;color:var(--red)}
+.subnav{max-width:1480px;margin:0 auto;padding:14px 20px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.subnav [data-sub]{border:0;border-bottom:3px solid transparent;background:transparent;padding:8px 12px;font-weight:700;font-size:15px;color:var(--muted);min-height:40px}
+.subnav [data-sub][aria-selected="true"]{color:var(--ink);border-bottom-color:var(--red)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:9px 14px;font-weight:600;font-size:14px;min-height:42px;display:flex;gap:6px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg button span{opacity:.7}
+.board{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
+#jBoard{overflow-x:auto;grid-template-columns:repeat(var(--cols,5),minmax(215px,1fr))}
+.col-head .sum{color:var(--muted);font-size:12.5px;font-weight:600}
+.chip.kind{background:var(--ink);color:var(--surface)}
+.chip.k-estimate{background:#6B4E9B;color:#fff}
+.chip.muted{background:var(--surface-2);color:var(--muted);border:1px solid var(--line);font-weight:600}
+.btn{text-decoration:none}
+.btn.sm{min-height:32px;padding:4px 10px;font-size:13px}
+.next{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.next .btn{flex:1 1 auto}
+.stage-seg{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+.linkbtn{background:none;border:0;padding:0;color:var(--red);font-weight:600;text-align:left}
+.linkbtn:hover{text-decoration:underline}
+.linkline{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:16px}
+.rowlist{max-width:1480px;margin:0 auto;padding:12px 20px 40px;display:flex;flex-direction:column;gap:8px}
+.rowlist.flush{padding:0;max-width:none}
+.row{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow)}
+.row .grow{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0}
+.row .grow b{display:block;font-size:15px}
+.row .grow small{display:block;color:var(--ink-2);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .grow .card-top{margin:0 0 4px}
+.row .side{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.row.done{opacity:.7}
+.sched-bar{max-width:1480px;margin:0 auto;padding:14px 20px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sched-bar input[type=date],.sched-bar select{padding:9px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);min-height:42px}
+.week{max-width:1480px;margin:0 auto;padding:12px 20px 0;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.week button{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);font-weight:600;min-height:64px}
+.week button b{font-family:var(--display);font-size:22px;line-height:1;color:var(--ink)}
+.week button.today b{color:var(--red)}
+.week button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--surface)}
+.week button[aria-pressed="true"] b{color:var(--surface)}
+.week .count{visibility:hidden}
+.week .count.on{visibility:visible}
+.sched-grid{max-width:1480px;margin:0 auto;padding:14px 20px 40px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:16px;align-items:start}
+.panel{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.panel-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.panel-head h2{font-family:var(--display);font-size:22px;font-weight:700;margin:0;margin-right:auto;line-height:1.1}
+.panel-note{color:var(--muted);font-size:13px;margin:0 0 10px}
+.stop-n{width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.row.done .stop-n{background:var(--ok)}
+.leg{color:var(--muted);font-size:12.5px;font-weight:600;padding:0 0 0 26px;display:flex;align-items:center;gap:8px}
+.leg::before{content:"";width:2px;height:16px;background:var(--line-2)}
+.arrows{display:flex;flex-direction:column;gap:2px}
+.arrows button{border:1px solid var(--line-2);background:var(--surface);border-radius:6px;width:30px;height:22px;font-size:10px;line-height:1;padding:0}
+.suggest-wrap{position:relative}
+.suggest{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--surface);border:1px solid var(--line-2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);overflow:hidden;margin-top:2px}
+.suggest button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:9px 12px}
+.suggest button:hover{background:var(--surface-2)}
+.suggest b{display:block}
+.suggest small{color:var(--muted)}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px}
+.check input{width:18px;height:18px}
+#ovMini{z-index:70}
+#mini{z-index:75;width:min(520px,calc(100% - 24px))}
+@media (max-width:900px){
+  .maintabs{order:3;width:100%}
+  .maintabs button{flex:1;justify-content:center;font-size:17px;padding:8px 6px}
+  .subnav{padding:10px 14px 0;gap:2px}
+  .subnav [data-sub]{padding:8px 8px;font-size:14px}
+  #jBoard{grid-template-columns:1fr;padding:10px 14px 40px}
+  .sched-bar,.week{padding-left:14px;padding-right:14px}
+  .sched-grid{grid-template-columns:1fr;padding:12px 14px 40px}
+  .rowlist{padding:10px 14px 40px}
+  .rowlist.flush{padding:0}
+  .row{flex-wrap:wrap}
+  .row .side{width:100%;justify-content:flex-start}
+}
 </style>
 </head>
 <body>
@@ -267,10 +349,14 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
     <div class="brand">
       <img src="/logo.png" alt="Roofing Solutions LLC">
       <div>
-        <h1>Office Task Board</h1>
-        <p>Assign it, track it, close it out.</p>
+        <h1>Office Board</h1>
+        <p>Tasks, tickets and the schedule in one place.</p>
       </div>
     </div>
+    <nav class="maintabs" role="tablist" aria-label="Section">
+      <button type="button" role="tab" id="mtTasks" aria-selected="true">Tasks <span class="count" id="mtTasksN" hidden></span></button>
+      <button type="button" role="tab" id="mtJobs" aria-selected="false">Jobs &amp; Estimates <span class="count" id="mtJobsN" hidden></span></button>
+    </nav>
     <div class="top-actions">
       <button class="btn" id="installBtn" type="button" hidden>Install app</button>
       <button class="me-btn" id="meBtn" type="button" aria-label="Change who you are"></button>
@@ -278,10 +364,17 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         New task
       </button>
+      <button class="btn primary" id="newTicketBtn" type="button" hidden>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        New ticket
+      </button>
     </div>
   </div>
 </header>
 
+<div class="notice" id="notice" hidden><div id="noticeText"></div></div>
+
+<div id="viewTasks">
 <div class="toolbar">
   <div class="search">
     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -296,10 +389,70 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
   <label class="sr" for="fType">Task type</label>
   <select id="fType"><option value="">All task types</option></select>
 </div>
-<div class="notice" id="notice" hidden><div id="noticeText"></div></div>
-
 <div class="tabs" id="tabs" role="tablist" aria-label="Status"></div>
-<main class="board" id="board"></main>
+<div class="board" id="board"></div>
+</div>
+
+<div id="viewJobs" hidden>
+  <div class="subnav" id="subnav" role="tablist" aria-label="Jobs and estimates">
+    <button type="button" role="tab" data-sub="tickets">Tickets</button>
+    <button type="button" role="tab" data-sub="schedule">Schedule</button>
+    <button type="button" role="tab" data-sub="customers">Customers</button>
+    <button type="button" role="tab" data-sub="lost">Lost estimates</button>
+    <button class="btn ghost" id="settingsBtn" type="button" style="margin-left:auto">Settings</button>
+  </div>
+
+  <section id="sub-tickets">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Pipeline">
+        <button type="button" id="pipeJobs" aria-pressed="true">Jobs <span id="pipeJobsN"></span></button>
+        <button type="button" id="pipeEst" aria-pressed="false">Estimates <span id="pipeEstN"></span></button>
+      </div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <label class="sr" for="jq">Search tickets</label>
+        <input id="jq" type="search" placeholder="Search customer, address, phone, ticket #…">
+      </div>
+      <label class="sr" for="jTrade">Trade</label>
+      <select id="jTrade"><option value="">All trades</option><option value="roof">Roof</option><option value="gutters">Gutters</option><option value="siding">Siding</option></select>
+      <label class="sr" for="jWho">Crew</label>
+      <select id="jWho"><option value="">Everyone</option></select>
+    </div>
+    <div class="tabs" id="jTabs" role="tablist" aria-label="Stage"></div>
+    <div class="board" id="jBoard"></div>
+  </section>
+
+  <section id="sub-schedule" hidden>
+    <div class="sched-bar">
+      <button class="btn" id="sPrev" type="button" aria-label="Previous day">‹</button>
+      <button class="btn" id="sToday" type="button">Today</button>
+      <button class="btn" id="sNext" type="button" aria-label="Next day">›</button>
+      <label class="sr" for="sDay">Day</label><input id="sDay" type="date">
+      <label class="sr" for="sCrew">Crew</label><select id="sCrew"><option value="">All crews</option></select>
+    </div>
+    <div class="week" id="week"></div>
+    <div class="sched-grid">
+      <div class="panel" id="schedDay"></div>
+      <div class="panel" id="schedUn"></div>
+    </div>
+  </section>
+
+  <section id="sub-customers" hidden>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <label class="sr" for="cq">Search customers</label>
+        <input id="cq" type="search" placeholder="Search name, phone, address…">
+      </div>
+      <button class="btn" id="newCustBtn" type="button">+ New customer</button>
+    </div>
+    <div class="rowlist" id="custList"></div>
+  </section>
+
+  <section id="sub-lost" hidden>
+    <div class="rowlist" id="lostList"></div>
+  </section>
+</div>
 
 <!-- Detail drawer -->
 <div class="overlay" id="ovDetail"></div>
@@ -326,6 +479,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
     <button class="btn ghost x" id="fClose" type="button" aria-label="Close">✕</button>
   </div>
   <div class="sheet-body">
+    <div class="linkline" id="fLink" hidden></div>
     <div class="trades-bar">
       <div class="lab" style="font-weight:600;font-size:14px;margin-bottom:8px">This job is for <span class="hint" style="color:var(--muted);font-weight:400">(pick all that apply)</span></div>
       <div class="toggle-row" id="tradeToggles">
@@ -378,7 +532,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
     <div class="field" id="amountWrap" hidden><label for="iAmount">Amount <span class="hint">(optional)</span></label><input id="iAmount" type="text" inputmode="decimal" placeholder="$0.00"></div>
 
     <div class="grid2">
-      <div class="field"><label for="iCustomer">Customer name</label><input id="iCustomer" type="text" autocomplete="off"></div>
+      <div class="field suggest-wrap"><label for="iCustomer">Customer name</label><input id="iCustomer" type="text" autocomplete="off"><div class="suggest" id="iSuggest" hidden></div></div>
       <div class="field"><label for="iPhone">Phone</label><input id="iPhone" type="tel" autocomplete="off"></div>
     </div>
     <div class="grid2">
@@ -399,6 +553,65 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
   </div>
 </div>
 
+<!-- Ticket form -->
+<div class="overlay" id="ovTForm"></div>
+<div class="sheet modal" id="tform" role="dialog" aria-modal="true" aria-labelledby="tTitle">
+  <div class="sheet-head">
+    <h2 id="tTitle">New ticket</h2>
+    <button class="btn ghost x" id="tClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="trades-bar">
+      <div class="lab" style="font-weight:600;font-size:14px;margin-bottom:8px">This ticket is for</div>
+      <div class="toggle-row" style="margin-bottom:12px">
+        <label class="toggle"><input type="radio" name="tkind" value="estimate"><span>Estimate</span></label>
+        <label class="toggle"><input type="radio" name="tkind" value="repair"><span>Repair</span></label>
+        <label class="toggle"><input type="radio" name="tkind" value="installation"><span>Installation</span></label>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle t-roof"><input type="checkbox" name="ttrade" value="roof"><span>Roof</span></label>
+        <label class="toggle t-gutters"><input type="checkbox" name="ttrade" value="gutters"><span>Gutters</span></label>
+        <label class="toggle t-siding"><input type="checkbox" name="ttrade" value="siding"><span>Siding</span></label>
+      </div>
+    </div>
+    <div class="group">
+      <p class="group-title">Customer</p>
+      <div class="grid2">
+        <div class="field suggest-wrap"><label for="tCustomer">Name <span class="hint">(start typing to find a saved customer)</span></label><input id="tCustomer" type="text" autocomplete="off"><div class="suggest" id="tSuggest" hidden></div></div>
+        <div class="field"><label for="tPhone">Mobile phone</label><input id="tPhone" type="tel" autocomplete="off"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="tEmail">Email</label><input id="tEmail" type="email" autocomplete="off"></div>
+        <div class="field"><span class="lab">Text reminders</span><label class="check" style="min-height:44px"><input type="checkbox" id="tSmsOk" checked> OK to text this customer</label></div>
+      </div>
+    </div>
+    <div class="field"><label for="tAddress">Job site address <span class="hint">(used for the map and the route)</span></label><input id="tAddress" type="text" autocomplete="off" placeholder="Street, town, state, ZIP"></div>
+    <div class="field"><label for="tDesc">What's needed</label><textarea id="tDesc" placeholder="Describe the problem or the work"></textarea></div>
+    <div class="field"><label for="tAmount">Amount <span class="hint">(optional – estimate or job price)</span></label><input id="tAmount" type="text" inputmode="decimal" placeholder="$0.00"></div>
+    <div class="group">
+      <p class="group-title">Schedule <span class="hint" style="font-family:var(--body);font-size:13px;font-weight:400;color:var(--muted)">– leave blank to schedule it later</span></p>
+      <div class="grid2">
+        <div class="field"><label for="tDate">Date</label><input id="tDate" type="date"></div>
+        <div class="field"><label for="tTime">Arrival time <span class="hint">(optional)</span></label><input id="tTime" type="time" style="width:100%;padding:10px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);min-height:44px"></div>
+      </div>
+      <div class="field"><label for="tAssignee">Who's going</label><select id="tAssignee"><option value="">Not assigned yet</option></select></div>
+    </div>
+    <div class="err" id="tErr" role="alert"></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn" id="tCancel" type="button">Cancel</button>
+    <button class="btn primary" id="tSave" type="button">Create ticket</button>
+  </div>
+</div>
+
+<!-- Small dialog (schedule, won/lost, reminders, customers, settings) -->
+<div class="overlay" id="ovMini"></div>
+<div class="sheet modal" id="mini" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="sheet-head"><h2 id="mTitle"></h2><button class="btn ghost x" id="mClose" type="button" aria-label="Close">✕</button></div>
+  <div class="sheet-body" id="mBody"></div>
+  <div class="sheet-foot" id="mFoot"></div>
+</div>
+
 <!-- Who am I -->
 <div class="overlay" id="ovWho"></div>
 <div class="sheet modal" id="who" role="dialog" aria-modal="true" aria-labelledby="wTitle" style="width:min(520px,calc(100% - 24px))">
@@ -417,7 +630,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 <div class="login" id="login" hidden>
   <form class="login-card" id="loginForm">
     <img src="/logo.png" alt="Roofing Solutions LLC">
-    <h1>Office Task Board</h1>
+    <h1>Office Board</h1>
     <p>Enter your personal code to sign in.</p>
     <label class="sr" for="pin">Personal code</label>
     <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••••••">
@@ -453,6 +666,7 @@ const PEOPLE=[
 const TYPES=[
   {id:"schedule",label:"Schedule job / create ticket"},
   {id:"estimate",label:"Send estimate",amount:true},
+  {id:"estfollow",label:"Follow up on estimate",amount:true},
   {id:"invoice",label:"Send invoice",amount:true},
   {id:"check",label:"Prepare check",amount:true},
   {id:"followup",label:"Follow up on payment",amount:true},
@@ -482,7 +696,7 @@ let me="";
 
 let tasks=[],notes=[],photos=[],authed=false,loadedOnce=false;
 let view={q:"",who:"",trade:"",type:"",mine:false,tab:"todo"};
-let openId=null,editingId=null,pendingFiles=[];
+let openId=null,openKind="task",editingId=null,pendingFiles=[];
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2800)}
 function notice(msg){$("#notice").hidden=!msg;$("#noticeText").textContent=msg||""}
@@ -493,6 +707,9 @@ function applyBoard(b){
   tasks=Object.entries(b.tasks||{}).map(([id,t])=>Object.assign({id},t));
   notes=Object.entries(b.notes||{}).map(([id,n])=>Object.assign({id},n));
   photos=Object.entries(b.photos||{}).map(([id,p])=>Object.assign({id},p));
+  tickets=Object.entries(b.tickets||{}).map(([id,t])=>Object.assign({id},t));
+  customers=Object.entries(b.customers||{}).map(([id,c])=>Object.assign({id},c));
+  settings=b.settings||{};
   loadedOnce=true;render();
 }
 async function api(path,opts){
@@ -523,11 +740,11 @@ $("#loginForm").addEventListener("submit",async e=>{
     const r=await fetch("/api/auth",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({pin})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){$("#loginErr").textContent=d.error||"Couldn't sign in. Try again.";}
-    else{authed=true;me=d.name||"";renderMe();$("#login").hidden=true;$("#pin").value="";await refresh()}
+    else{authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();$("#login").hidden=true;$("#pin").value="";await refresh()}
   }catch(err){$("#loginErr").textContent="No connection. Check your internet and try again."}
   $("#loginBtn").disabled=false;
 });
-async function signOut(){await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";tasks=[];notes=[];photos=[];closeWho();renderMe();render();showLogin()}
+async function signOut(){await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";tasks=[];notes=[];photos=[];tickets=[];customers=[];closeWho();renderMe();render();showLogin()}
 
 // ---------- selects ----------
 for(const p of PEOPLE){$("#fWho").append(el("option",{value:p.name},p.name));$("#iAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
@@ -587,6 +804,8 @@ function cardFor(t){
   const pCount=photos.filter(p=>p.taskId===t.id).length;
   const top=el("div",{class:"card-top"});
   for(const tr of (t.trades||[]))top.append(el("span",{class:"chip "+tr},TRADE_LABEL[tr]));
+  const linked=t.ticketId&&tickets.find(k=>k.id===t.ticketId);
+  if(linked)top.append(el("span",{class:"chip type",title:"Linked to ticket "+tnum(linked)},tnum(linked)));
   top.append(el("span",{class:"num"},"#"+(t.number||"")));
   const title=typeLabel(t.type)+(t.type==="schedule"&&t.kind?" – "+t.kind:"");
   const flags=el("div",{class:"card-top",style:"margin:6px 0 0"});
@@ -615,6 +834,8 @@ function render(){
   }
   const mine=tasks.filter(t=>t.assignee===me&&t.status!=="done").length;
   $("#mineCount").textContent=mine;$("#mineCount").hidden=!mine||!me;
+  $("#mtTasksN").textContent=mine;$("#mtTasksN").hidden=!mine||!me;
+  renderJobs();
   if(openId)renderDetail();
 }
 $("#q").addEventListener("input",e=>{view.q=e.target.value;render()});
@@ -624,12 +845,15 @@ $("#fType").onchange=e=>{view.type=e.target.value;render()};
 $("#mineBtn").onclick=()=>{if(!me){showLogin();return}view.mine=!view.mine;$("#mineBtn").setAttribute("aria-pressed",String(view.mine));render()};
 
 // ---------- detail ----------
-function openDetail(id){openId=id;$("#noteText").value="";renderDetail();$("#ovDetail").classList.add("open");$("#detail").classList.add("open");$("#dBody").scrollTop=0}
+function openDetail(id){openKind="task";openId=id;$("#noteText").value="";renderDetail();$("#ovDetail").classList.add("open");$("#detail").classList.add("open");$("#dBody").scrollTop=0}
 function closeDetail(){openId=null;$("#ovDetail").classList.remove("open");$("#detail").classList.remove("open")}
 $("#dClose").onclick=closeDetail;$("#ovDetail").onclick=closeDetail;
-$("#dEdit").onclick=()=>{const t=tasks.find(x=>x.id===openId);if(t)openForm(t)};
+$("#dEdit").onclick=()=>{if(openKind==="ticket"){const t=tickets.find(x=>x.id===openId);if(t)openTicketForm(t)}else if(openKind==="customer"){const c=customers.find(x=>x.id===openId);if(c)openCustomerForm(c)}else{const t=tasks.find(x=>x.id===openId);if(t)openForm(t)}};
 function renderDetail(){
+  if(openKind==="ticket")return renderTicketDetail();
+  if(openKind==="customer")return renderCustomerDetail();
   const t=tasks.find(x=>x.id===openId);const b=$("#dBody");
+  $("#postingAs").hidden=!t;$(".compose").hidden=!t;
   if(!t){b.replaceChildren(el("p",{class:"empty"},"This task was deleted."));$("#dEdit").hidden=true;return}
   $("#dEdit").hidden=false;$("#dTitle").textContent="Task #"+(t.number||"");
   const chips=el("div",{class:"d-chips"});
@@ -651,6 +875,9 @@ function renderDetail(){
     row("Color",t.colorStatus==="selected"?(t.color||"Selected"):t.colorStatus==="pending"?el("span",{class:"chip flag"},"Not picked yet"):t.colorStatus==="na"?"N/A":el("span",{class:"chip flag"},"Not set"));
   }
   row("Amount",t.amount);
+  const tk=t.ticketId&&tickets.find(k=>k.id===t.ticketId);
+  if(tk)row("Ticket",el("button",{type:"button",class:"linkbtn",onclick:()=>openTicket(tk.id)},tnum(tk)+" · "+(KINDS[tk.kind]||"")+" · "+stageOf(tk).label));
+  else if(t.customer)row("Ticket",el("button",{type:"button",class:"btn sm",onclick:()=>openTicketForm(null,{task:t})},"Create a ticket from this task"));
   const nodes=[chips,el("p",{class:"d-title"},(t.customer||typeLabel(t.type))+(t.type==="schedule"&&t.kind?" – "+t.kind:"")),el("div",{class:"d-sub"},"Created by "+(t.createdBy||"someone")+" · "+fmtStamp(t.createdAt||Date.now())),seg,info];
   if(t.description)nodes.push(el("div",{class:"sec"},"Description"),el("div",{class:"desc"},t.description));
   const ps=photos.filter(p=>p.taskId===t.id).sort((a,b)=>a.at-b.at);
@@ -680,7 +907,7 @@ function photoTile(p){
 function openLb(src){$("#lbImg").src=src;$("#lightbox").classList.add("open")}
 $("#lbClose").onclick=()=>$("#lightbox").classList.remove("open");
 $("#lightbox").onclick=e=>{if(e.target.id==="lightbox")$("#lightbox").classList.remove("open")};
-document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("#lightbox").classList.contains("open"))$("#lightbox").classList.remove("open");else if($("#form").classList.contains("open"))closeForm();else if(openId)closeDetail()});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if($("#lightbox").classList.contains("open"))$("#lightbox").classList.remove("open");else if($("#mini").classList.contains("open"))closeMini();else if($("#tform").classList.contains("open"))closeTicketForm();else if($("#form").classList.contains("open"))closeForm();else if(openId)closeDetail()});
 
 function requireMe(){if(!me){showLogin();return false}return true}
 $("#noteSend").onclick=async()=>{
@@ -729,17 +956,22 @@ function renderPending(){
   const inp=el("input",{type:"file",accept:"image/*",multiple:true,"aria-label":"Add photos"});inp.onchange=()=>{pendingFiles.push(...inp.files);renderPending()};
   g.append(el("label",{class:"add-ph"},el("span",null,"+ Add photos"),inp));
 }
-function openForm(t){
+function openForm(t,pre){
   if(!requireMe())return;
   editingId=t?t.id:null;pendingFiles=[];
-  $("#fTitle").textContent=t?"Edit task #"+t.number:"New task";$("#fSave").textContent=t?"Save changes":"Create task";$("#fDelete").hidden=!t;
+  const pk=pre&&pre.ticket;formTicketId=t?t.ticketId||"":pk?pk.id:"";
+  if(pk){const c=cust(pk.customerId);t={trades:pk.trades,customer:c.name,phone:c.phone,email:c.email,address:pk.address,amount:pk.amount}}
+  const lk=tickets.find(k=>k.id===formTicketId);
+  $("#fLink").hidden=!lk;
+  if(lk)$("#fLink").replaceChildren("Linked to ticket ",el("b",null,tnum(lk)+" · "+cust(lk.customerId).name),"  ",el("button",{type:"button",class:"linkbtn",onclick:()=>{formTicketId="";$("#fLink").hidden=true}},"Remove link"));
+  $("#fTitle").textContent=editingId?"Edit task #"+t.number:"New task";$("#fSave").textContent=editingId?"Save changes":"Create task";$("#fDelete").hidden=!editingId;
   document.querySelectorAll('input[name="trade"]').forEach(i=>i.checked=t?(t.trades||[]).includes(i.value):false);
   $("#iType").value=t?t.type||"":"";$("#iAssignee").value=t?t.assignee||"":"";
   setRadio("kind",t?t.kind||"":"");setRadio("dep",t?t.deposit||"":"");setRadio("depPaid",t?t.depositPaid||"":"");setRadio("colorSt",t?t.colorStatus||"":"");
   $("#iColor").value=t?t.color||"":"";$("#iAmount").value=t?t.amount||"":"";
   $("#iCustomer").value=t?t.customer||"":"";$("#iPhone").value=t?t.phone||"":"";$("#iEmail").value=t?t.email||"":"";
   $("#iDue").value=t?t.due||"":"";$("#iAddress").value=t?t.address||"":"";$("#iDesc").value=t?t.description||"":"";
-  $("#photoPick").hidden=!!t;$("#formErr").textContent="";
+  $("#photoPick").hidden=!!editingId;$("#formErr").textContent="";
   renderPending();syncForm();
   $("#ovForm").classList.add("open");$("#form").classList.add("open");
 }
@@ -753,7 +985,7 @@ $("#fSave").onclick=async()=>{
     type:$("#iType").value,assignee:$("#iAssignee").value,
     customer:$("#iCustomer").value,phone:$("#iPhone").value,email:$("#iEmail").value,
     due:$("#iDue").value,address:$("#iAddress").value,description:$("#iDesc").value,amount:$("#iAmount").value,
-    kind:getRadio("kind"),deposit:getRadio("dep"),depositPaid:getRadio("depPaid"),colorStatus:getRadio("colorSt"),color:$("#iColor").value
+    kind:getRadio("kind"),deposit:getRadio("dep"),depositPaid:getRadio("depPaid"),colorStatus:getRadio("colorSt"),color:$("#iColor").value,ticketId:formTicketId
   };
   const miss=[];if(!data.type)miss.push("task type");if(!data.assignee)miss.push("who it's assigned to");
   if(data.type==="schedule"&&!data.kind)miss.push("installation, repair, or inspection");
@@ -766,12 +998,502 @@ $("#fSave").onclick=async()=>{
   $("#fSave").disabled=false;
 };
 
+// =====================================================================
+// Jobs & Estimates: tickets, schedule, customers
+// =====================================================================
+const KINDS={estimate:"Estimate",repair:"Repair",installation:"Installation"};
+const JOB_STAGES=[
+  {id:"ticket",label:"Needs scheduling",color:"#767D84"},
+  {id:"scheduled",label:"Scheduled",color:"#2D6A8E"},
+  {id:"completed",label:"Completed",color:"#6B4E9B"},
+  {id:"billed",label:"Billed",color:"#B4540A"},
+  {id:"paid",label:"Paid / closed",color:"#2C7A4B"}
+];
+const EST_STAGES=[
+  {id:"ticket",label:"Needs scheduling",color:"#767D84"},
+  {id:"scheduled",label:"Scheduled",color:"#2D6A8E"},
+  {id:"visited",label:"Visited",color:"#6B4E9B"},
+  {id:"sent",label:"Estimate sent",color:"#1F7A7A"},
+  {id:"followup",label:"Needs follow-up",color:"#B4540A"},
+  {id:"won",label:"Won",color:"#2C7A4B"}
+];
+const LOST={id:"lost",label:"Lost",color:"#A8252B"};
+const DEFAULT_SMS="Hi {first}, this is Roofing Solutions. A reminder that we're scheduled to come out {when}{time} for your {service} at {address}. Questions? Call or text {company_phone}.";
+const stagesOf=t=>t.kind==="estimate"?EST_STAGES:JOB_STAGES;
+const stageOf=t=>t.stage==="lost"?LOST:(stagesOf(t).find(s=>s.id===t.stage)||stagesOf(t)[0]);
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const shiftDay=(s,n)=>{const d=parseDue(s);d.setDate(d.getDate()+n);return ymd(d)};
+const fmtTime=hm=>{const m=/^(\d{1,2}):(\d{2})$/.exec(hm||"");if(!m)return"";const h=+m[1];return((h+11)%12+1)+(m[2]==="00"?"":":"+m[2])+(h<12?" AM":" PM")};
+const fmtDay=s=>parseDue(s).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+const money=s=>{const n=parseFloat(String(s||"").replace(/[^0-9.]/g,""));return isFinite(n)?n:0};
+const daysSince=ms=>Math.floor((Date.now()-(ms||Date.now()))/864e5);
+const cust=id=>customers.find(c=>c.id===id)||{name:"(customer removed)"};
+const tnum=t=>"T-"+(t.number||"");
+const smsHref=p=>{const d=String(p||"").replace(/\D/g,"");return"sms:"+(d.length===10?"+1"+d:d.length===11?"+"+d:d)};
+const S=()=>Object.assign({shopAddress:"",shopLat:null,shopLng:null,companyPhone:"",smsTemplate:DEFAULT_SMS,autoSms:true,skipDays:[],autoTasks:true,officeAssignee:"Loriale"},settings);
+
+let tickets=[],customers=[],settings={},smsReady=false;
+const jv={main:ls.get("rs_main")==="jobs"?"jobs":"tasks",sub:["tickets","schedule","customers","lost"].includes(ls.get("rs_sub"))?ls.get("rs_sub"):"tickets",pipe:ls.get("rs_pipe")==="est"?"est":"jobs",q:"",trade:"",who:"",tab:"ticket",day:ymd(new Date()),crew:"",cq:""};
+let tEditing=null,tCustId="",tFromTask="",formTicketId="";
+
+for(const p of PEOPLE){for(const s of ["#jWho","#sCrew"])$(s).append(el("option",{value:p.name},p.name));$("#tAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
+
+// ---------- navigation ----------
+function setMain(m){
+  jv.main=m;ls.set("rs_main",m);
+  $("#viewTasks").hidden=m!=="tasks";$("#viewJobs").hidden=m!=="jobs";
+  $("#newBtn").hidden=m!=="tasks";$("#newTicketBtn").hidden=m!=="jobs";
+  $("#mtTasks").setAttribute("aria-selected",String(m==="tasks"));$("#mtJobs").setAttribute("aria-selected",String(m==="jobs"));
+  render();
+}
+function setSub(s){jv.sub=s;ls.set("rs_sub",s);renderJobs()}
+$("#mtTasks").onclick=()=>setMain("tasks");$("#mtJobs").onclick=()=>setMain("jobs");
+document.querySelectorAll("#subnav [data-sub]").forEach(b=>b.onclick=()=>setSub(b.dataset.sub));
+$("#pipeJobs").onclick=()=>{jv.pipe="jobs";jv.tab="ticket";ls.set("rs_pipe","jobs");renderJobs()};
+$("#pipeEst").onclick=()=>{jv.pipe="est";jv.tab="ticket";ls.set("rs_pipe","est");renderJobs()};
+$("#jq").addEventListener("input",e=>{jv.q=e.target.value;renderJobs()});
+$("#jTrade").onchange=e=>{jv.trade=e.target.value;renderJobs()};
+$("#jWho").onchange=e=>{jv.who=e.target.value;renderJobs()};
+$("#cq").addEventListener("input",e=>{jv.cq=e.target.value;renderJobs()});
+$("#sPrev").onclick=()=>{jv.day=shiftDay(jv.day,-1);renderJobs()};
+$("#sNext").onclick=()=>{jv.day=shiftDay(jv.day,1);renderJobs()};
+$("#sToday").onclick=()=>{jv.day=ymd(new Date());renderJobs()};
+$("#sDay").onchange=e=>{if(e.target.value){jv.day=e.target.value;renderJobs()}};
+$("#sCrew").onchange=e=>{jv.crew=e.target.value;renderJobs()};
+$("#newTicketBtn").onclick=()=>openTicketForm(null);
+$("#newCustBtn").onclick=()=>openCustomerForm(null);
+$("#settingsBtn").onclick=()=>openSettings();
+
+function renderJobs(){
+  const waiting=tickets.filter(t=>t.stage==="ticket").length;
+  $("#mtJobsN").textContent=waiting;$("#mtJobsN").hidden=!waiting;
+  if(jv.main!=="jobs")return;
+  const nLost=tickets.filter(t=>t.stage==="lost").length;
+  document.querySelectorAll("#subnav [data-sub]").forEach(b=>{b.setAttribute("aria-selected",String(b.dataset.sub===jv.sub));if(b.dataset.sub==="lost")b.textContent="Lost estimates"+(nLost?" ("+nLost+")":"")});
+  for(const s of ["tickets","schedule","customers","lost"])$("#sub-"+s).hidden=jv.sub!==s;
+  ({tickets:renderPipeline,schedule:renderSchedule,customers:renderCustomers,lost:renderLost})[jv.sub]();
+}
+
+// ---------- ticket cards + pipeline ----------
+const byWhen=(a,b)=>{const x=(a.date||"9")+(a.time||"99"),y=(b.date||"9")+(b.time||"99");return x<y?-1:x>y?1:(a.createdAt||0)-(b.createdAt||0)};
+function whenLabel(t){
+  if(!t.date)return"";
+  const diff=Math.round((parseDue(t.date)-today())/864e5);
+  return(diff===0?"Today":diff===1?"Tomorrow":diff===-1?"Yesterday":fmtDay(t.date))+(t.time?" · "+fmtTime(t.time):"");
+}
+const isStale=t=>t.stage==="scheduled"&&t.date&&parseDue(t.date)<today();
+function ticketFlags(t){
+  const out=[];
+  if(isStale(t))out.push(el("span",{class:"chip flag"},"Date passed – update"));
+  if(t.stage==="ticket"&&daysSince(t.stageAt)>=3)out.push(el("span",{class:"chip flag"},"Waiting "+daysSince(t.stageAt)+" days"));
+  if(t.stage==="sent"&&daysSince(t.stageAt)>=7)out.push(el("span",{class:"chip flag"},"No answer in "+daysSince(t.stageAt)+" days"));
+  if(t.stage==="followup"&&t.followUp)out.push(el("span",{class:"chip "+(parseDue(t.followUp)<=today()?"flag":"muted")},parseDue(t.followUp)<=today()?"Follow up now":"Follow up "+fmtDay(t.followUp)));
+  if(t.stage==="billed"&&daysSince(t.stageAt)>=30)out.push(el("span",{class:"chip flag"},"Unpaid "+daysSince(t.stageAt)+" days"));
+  if(t.stage==="scheduled"&&t.reminder&&t.reminder.forDate===t.date)out.push(el("span",{class:"chip "+(t.reminder.status==="sent"?"good":"flag")},t.reminder.status==="sent"?"Reminder texted":"Text failed"));
+  if(t.amount)out.push(el("span",{class:"chip type"},t.amount));
+  return out;
+}
+function ticketChips(t){
+  const top=el("div",{class:"card-top"},el("span",{class:"chip kind k-"+t.kind},KINDS[t.kind]||"Ticket"));
+  for(const tr of (t.trades||[]))top.append(el("span",{class:"chip "+tr},TRADE_LABEL[tr]));
+  return top;
+}
+function ticketCard(t){
+  const c=cust(t.customerId);
+  const top=ticketChips(t);top.append(el("span",{class:"num"},tnum(t)));
+  const flags=el("div",{class:"card-top",style:"margin:6px 0 0"},...ticketFlags(t));
+  const foot=el("div",{class:"card-foot"});
+  if(t.assignee)foot.append(el("span",{class:"who"},av(t.assignee),t.assignee));
+  if(t.date)foot.append(el("span",{class:"due "+(isStale(t)?"late":"")},whenLabel(t)));
+  const nCount=notes.filter(n=>n.taskId===t.id&&n.kind!=="activity").length,pCount=photos.filter(p=>p.taskId===t.id).length;
+  if(nCount)foot.append(el("span",{class:"meta",title:nCount+" notes"},svgNote(),String(nCount)));
+  if(pCount)foot.append(el("span",{class:"meta",title:pCount+" photos"},svgCam(),String(pCount)));
+  return el("button",{type:"button",class:"card"+(isStale(t)?" overdue":""),onclick:()=>openTicket(t.id)},top,el("h3",null,c.name),el("div",{class:"sub"},t.address||(t.description||"").slice(0,120)),flags.childNodes.length?flags:null,foot.childNodes.length?foot:null);
+}
+function tMatch(t){
+  if(jv.trade&&!(t.trades||[]).includes(jv.trade))return false;
+  if(jv.who&&t.assignee!==jv.who)return false;
+  const q=jv.q.trim().toLowerCase();if(!q)return true;
+  const c=cust(t.customerId);
+  return[c.name,c.phone,c.email,t.address,t.description,t.assignee,tnum(t),KINDS[t.kind]].join(" ").toLowerCase().includes(q);
+}
+function renderPipeline(){
+  const isEst=jv.pipe==="est",stages=isEst?EST_STAGES:JOB_STAGES;
+  const open=k=>tickets.filter(t=>(t.kind==="estimate")===k&&!["paid","won","lost"].includes(t.stage)).length;
+  $("#pipeJobs").setAttribute("aria-pressed",String(!isEst));$("#pipeEst").setAttribute("aria-pressed",String(isEst));
+  $("#pipeJobsN").textContent=open(false);$("#pipeEstN").textContent=open(true);
+  const list=tickets.filter(t=>(t.kind==="estimate")===isEst&&tMatch(t));
+  const board=$("#jBoard"),tabs=$("#jTabs");board.replaceChildren();tabs.replaceChildren();board.style.setProperty("--cols",stages.length);
+  if(!stages.some(s=>s.id===jv.tab))jv.tab="ticket";
+  for(const s of stages){
+    let items=list.filter(t=>t.stage===s.id);
+    if(s.id==="ticket")items.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    else if(s.id==="scheduled")items.sort(byWhen);
+    else items.sort((a,b)=>(b.stageAt||0)-(a.stageAt||0));
+    const total=items.reduce((n,t)=>n+money(t.amount),0),count=items.length;
+    const closed=s.id==="paid"||s.id==="won";
+    const body=el("div",{class:"col-body"});
+    if(!count)body.append(el("div",{class:"empty"},!loadedOnce?"Loading…":s.id==="ticket"&&!tickets.length?"No tickets yet. Use New ticket to add the first one.":"Nothing here."));
+    for(const t of (closed?items.slice(0,30):items))body.append(ticketCard(t));
+    if(closed&&count>30)body.append(el("div",{class:"empty"},"Showing the 30 most recent. Search to find older ones."));
+    board.append(el("section",{class:"col"+(jv.tab===s.id?" active":""),"aria-label":s.label},
+      el("div",{class:"col-head"},el("span",{class:"dot",style:"background:"+s.color}),el("h2",null,s.label),el("span",{class:"n"},total?el("span",{class:"sum"},"$"+Math.round(total).toLocaleString()+" · "):null,String(count))),body));
+    tabs.append(el("button",{type:"button",role:"tab","aria-selected":String(jv.tab===s.id),onclick:()=>{jv.tab=s.id;renderJobs()}},s.label,el("span",{style:"opacity:.7"},String(count))));
+  }
+}
+
+// ---------- schedule + route ----------
+const hasGeo=x=>x&&typeof x.lat==="number"&&typeof x.lng==="number";
+function miles(a,b){const R=3958.8,r=x=>x*Math.PI/180,dLa=r(b.lat-a.lat),dLn=r(b.lng-a.lng),h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+// Stops still to do come first, in route order; finished ones drop to the bottom.
+const dayStops=()=>tickets.filter(t=>t.date===jv.day&&t.stage!=="lost"&&(!jv.crew||t.assignee===jv.crew)).sort((a,b)=>((a.stage!=="scheduled")-(b.stage!=="scheduled"))||((a.ord==null?999:a.ord)-(b.ord==null?999:b.ord))||byWhen(a,b));
+function mapsUrl(stops){
+  const pts=stops.map(t=>t.address).filter(Boolean);if(!pts.length)return"";
+  const dest=pts.pop();
+  let u="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(dest);
+  if(S().shopAddress)u+="&origin="+encodeURIComponent(S().shopAddress);
+  if(pts.length)u+="&waypoints="+encodeURIComponent(pts.slice(0,9).join("|"));
+  return u;
+}
+function reminderBit(t){
+  if(t.stage!=="scheduled")return null;
+  const c=cust(t.customerId),r=t.reminder&&t.reminder.forDate===t.date?t.reminder:null;
+  if(!c.phone)return el("span",{class:"chip muted"},"No phone");
+  if(c.smsOk===false)return el("span",{class:"chip muted"},"No texts");
+  if(r&&r.status==="sent")return el("span",{class:"chip good",title:"Sent "+fmtStamp(r.at)},"Reminder texted");
+  return el("button",{type:"button",class:"btn sm",onclick:()=>openReminder(t)},r?"Retry text":"Text reminder");
+}
+function renderSchedule(){
+  $("#sDay").value=jv.day;$("#sCrew").value=jv.crew;
+  const tday=ymd(new Date());
+  const start=parseDue(jv.day);start.setDate(start.getDate()-start.getDay());
+  const week=$("#week");week.replaceChildren();
+  for(let i=0;i<7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=ymd(d);
+    const n=tickets.filter(t=>t.date===k&&t.stage!=="lost"&&(!jv.crew||t.assignee===jv.crew)).length;
+    week.append(el("button",{type:"button","aria-pressed":String(k===jv.day),class:k===tday?"today":"","aria-label":d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+", "+n+" stops",onclick:()=>{jv.day=k;renderJobs()}},
+      d.toLocaleDateString(undefined,{weekday:"short"}),el("b",null,String(d.getDate())),el("span",{class:"count"+(n?" on":"")},String(n))));
+  }
+  // the day
+  const stops=dayStops(),todo=stops.filter(t=>t.stage==="scheduled"),s=S(),shop=hasGeo({lat:s.shopLat,lng:s.shopLng})?{lat:s.shopLat,lng:s.shopLng}:null;
+  const title=(jv.day===tday?"Today · ":jv.day===shiftDay(tday,1)?"Tomorrow · ":"")+parseDue(jv.day).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  const url=mapsUrl(todo);
+  const head=el("div",{class:"panel-head"},el("h2",null,title),
+    todo.length>1?el("button",{type:"button",class:"btn",onclick:buildRoute},"Best route"):null,
+    url?el("a",{class:"btn primary",href:url,target:"_blank",rel:"noopener"},"Open in Google Maps"):null);
+  const list=el("div",{class:"rowlist flush"});
+  let prev=shop,total=0,known=true;
+  if(!stops.length)list.append(el("div",{class:"empty"},loadedOnce?"Nothing scheduled"+(jv.crew?" for "+jv.crew:"")+" this day. Add a ticket from the list "+(window.innerWidth>900?"on the right.":"below."):"Loading…"));
+  stops.forEach((t,i)=>{
+    const c=cust(t.customerId),done=t.stage!=="scheduled";
+    if(done){}else if(hasGeo(t)&&prev){const m=miles(prev,t)*1.3;total+=m;if(i||shop)list.append(el("div",{class:"leg"},"about "+(m<10?m.toFixed(1):Math.round(m))+" mi"+(i?"":" from the shop")))}
+    else if(i)known=false;
+    if(!done){if(hasGeo(t))prev=t;else{prev=null;if(t.address)known=false}}
+    const main=el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,t.address||"No address yet"),
+      el("small",null,[t.time?fmtTime(t.time):"Any time",t.assignee||"Not assigned",done?stageOf(t).label:""].filter(Boolean).join(" · ")));
+    const side=el("div",{class:"side"},reminderBit(t),
+      done?null:el("button",{type:"button",class:"btn sm",onclick:()=>goStage(t,t.kind==="estimate"?"visited":"completed")},t.kind==="estimate"?"Visited":"Completed"),
+      !done&&todo.length>1?el("span",{class:"arrows"},el("button",{type:"button","aria-label":"Move up",disabled:i===0,onclick:()=>moveStop(i,-1)},"▲"),el("button",{type:"button","aria-label":"Move down",disabled:i===todo.length-1,onclick:()=>moveStop(i,1)},"▼")):null);
+    list.append(el("div",{class:"row"+(done?" done":"")},el("span",{class:"stop-n"},done?"✓":String(i+1)),main,side));
+  });
+  const bits=[todo.length+" stop"+(todo.length===1?"":"s")+" to go"+(stops.length>todo.length?" · "+(stops.length-todo.length)+" done":"")];
+  if(total>0)bits.push("about "+Math.round(total)+" mi of driving"+(known?"":" (some addresses aren't on the map yet)"));
+  const texts=!smsReady?"Automatic texts aren't set up yet – use Text reminder to send from your own phone.":!s.autoSms?"Automatic reminder texts are turned off in Settings.":"Customers are texted automatically the evening before.";
+  $("#schedDay").replaceChildren(head,el("p",{class:"panel-note"},bits.join(" · ")+(s.shopAddress?"":" · Add your shop address in Settings so routes start from there.")),list,el("p",{class:"panel-note",style:"margin:12px 0 0"},texts));
+  // waiting list
+  const un=tickets.filter(t=>t.stage==="ticket").sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const ul=el("div",{class:"rowlist flush"});
+  if(!un.length)ul.append(el("div",{class:"empty"},"Every ticket is on the schedule."));
+  for(const t of un){
+    const c=cust(t.customerId);
+    ul.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,t.address||(t.description||"").slice(0,80)||"No address yet"),
+      daysSince(t.stageAt)>=1?el("small",null,"Waiting "+daysSince(t.stageAt)+" day"+(daysSince(t.stageAt)===1?"":"s")):null),
+      el("div",{class:"side"},el("button",{type:"button",class:"btn sm",onclick:()=>openSchedule(t,jv.day)},"Add to "+parseDue(jv.day).toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"})))));
+  }
+  $("#schedUn").replaceChildren(el("div",{class:"panel-head"},el("h2",null,"Needs scheduling"),el("span",{class:"n",style:"color:var(--muted);font-weight:600"},String(un.length))),ul);
+}
+async function buildRoute(){
+  toast("Working out the best route…");
+  try{
+    const r=await op({op:"route",date:jv.day,assignee:jv.crew});
+    toast(r.missing?"Route set. "+r.missing+" address"+(r.missing>1?"es":"")+" couldn't be found on the map – check the spelling.":"Route set – "+r.count+" stops in the shortest driving order.");
+  }catch(e){}
+}
+function moveStop(i,dir){
+  const ids=dayStops().filter(t=>t.stage==="scheduled").map(t=>t.id),j=i+dir;if(j<0||j>=ids.length)return;
+  [ids[i],ids[j]]=[ids[j],ids[i]];op({op:"reorder",ids}).catch(()=>{});
+}
+
+// ---------- customers + lost ----------
+function renderCustomers(){
+  const q=jv.cq.trim().toLowerCase(),list=$("#custList");list.replaceChildren();
+  const rows=customers.filter(c=>!q||[c.name,c.phone,c.email,c.address,c.notes].join(" ").toLowerCase().includes(q)).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  if(!rows.length)list.append(el("div",{class:"empty"},!loadedOnce?"Loading…":customers.length?"No customers match that search.":"No customers yet. They're saved automatically when you create a ticket."));
+  for(const c of rows.slice(0,200)){
+    const mine=tickets.filter(t=>t.customerId===c.id),open=mine.filter(t=>!["paid","won","lost"].includes(t.stage)).length;
+    list.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openCustomer(c.id)},el("b",null,c.name),el("small",null,[c.phone,c.address].filter(Boolean).join(" · ")||"No contact details yet")),
+      el("div",{class:"side"},open?el("span",{class:"chip flag"},open+" open"):null,el("span",{class:"chip muted"},mine.length+" ticket"+(mine.length===1?"":"s")))));
+  }
+  if(rows.length>200)list.append(el("div",{class:"empty"},"Showing the first 200. Search to narrow it down."));
+}
+function renderLost(){
+  const list=$("#lostList");list.replaceChildren();
+  const rows=tickets.filter(t=>t.stage==="lost").sort((a,b)=>(b.stageAt||0)-(a.stageAt||0));
+  const total=rows.reduce((n,t)=>n+money(t.amount),0);
+  list.append(el("p",{class:"panel-note",style:"margin:4px 0"},rows.length?rows.length+" lost estimate"+(rows.length===1?"":"s")+(total?" · $"+Math.round(total).toLocaleString()+" in quotes":"")+". Worth a second look every so often – reopen one to put it back in follow-up.":"No lost estimates. When an estimate is marked lost it's kept here so you can come back to it."));
+  for(const t of rows){
+    const c=cust(t.customerId);
+    list.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name+(t.amount?" · "+t.amount:"")),el("small",null,t.address||""),
+      el("small",null,"Lost "+new Date(t.stageAt||t.updatedAt).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+(t.lostReason?" · "+t.lostReason:""))),
+      el("div",{class:"side"},c.phone?el("a",{class:"btn sm",href:"tel:"+c.phone.replace(/[^\d+]/g,"")},"Call"):null,el("button",{type:"button",class:"btn sm",onclick:()=>op({op:"ticketStage",id:t.id,stage:"followup"}).then(()=>toast("Reopened – it's back in Needs follow-up")).catch(()=>{})},"Reopen"))));
+  }
+}
+
+// ---------- small dialog ----------
+function openMini(title,body,actions){
+  $("#mTitle").textContent=title;$("#mBody").replaceChildren(...body.filter(Boolean));$("#mFoot").replaceChildren(...actions.filter(Boolean));
+  $("#ovMini").classList.add("open");$("#mini").classList.add("open");
+}
+function closeMini(){$("#ovMini").classList.remove("open");$("#mini").classList.remove("open")}
+$("#mClose").onclick=closeMini;$("#ovMini").onclick=closeMini;
+const fld=(label,input,hint)=>el("div",{class:"field"},el("label",{for:input.id},label,hint?el("span",{class:"hint"}," "+hint):null),input);
+const inp=(id,type,val,attrs)=>{const n=el("input",Object.assign({id,type},attrs||{}));n.value=val||"";return n};
+const area=(id,val,ph)=>{const n=el("textarea",{id,placeholder:ph||""});n.value=val||"";return n};
+const sel=(id,opts,val)=>{const n=el("select",{id});for(const [v,l] of opts)n.append(el("option",{value:v},l));n.value=val||"";return n};
+const chk=(id,label,on)=>{const n=el("input",{id,type:"checkbox"});n.checked=!!on;return el("label",{class:"check",style:"margin-bottom:14px"},n,label)};
+const crewOpts=()=>[["","Not assigned yet"],...PEOPLE.map(p=>[p.name,p.name+" – "+p.role])];
+function btn(label,cls,fn){const b=el("button",{type:"button",class:"btn "+(cls||"")},label);b.onclick=async()=>{b.disabled=true;try{await fn()}catch(e){}b.disabled=false};return b}
+
+function openSchedule(t,preDate){
+  const d=inp("mDate","date",t.date||preDate||""),tm=inp("mTime","time",t.time||""),who=sel("mWho",crewOpts(),t.assignee||jv.crew||"");
+  tm.style.cssText="width:100%;padding:10px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);min-height:44px";
+  const err=el("div",{class:"err",role:"alert"});
+  openMini((t.date?"Reschedule – ":"Schedule – ")+cust(t.customerId).name,
+    [el("div",{class:"grid2"},fld("Date",d),fld("Arrival time",tm,"(optional)")),fld("Who's going",who),err],
+    [t.date?btn("Take off schedule","danger",async()=>{await op({op:"ticketSchedule",id:t.id,date:"",time:"",assignee:who.value});closeMini();toast("Taken off the schedule")}):null,
+     btn("Cancel","",closeMini),
+     btn("Save","primary",async()=>{if(!d.value){err.textContent="Pick a date.";return}await op({op:"ticketSchedule",id:t.id,date:d.value,time:tm.value,assignee:who.value});closeMini();toast("Scheduled for "+fmtDay(d.value))})]);
+  if(t.date)$("#mFoot").firstChild.style.marginRight="auto";
+}
+function goStage(t,stage){
+  if(stage===t.stage)return;
+  const send=extra=>op(Object.assign({op:"ticketStage",id:t.id,stage},extra||{}));
+  if(stage==="scheduled"&&!t.date)return openSchedule(t);
+  if(stage==="won"){
+    if(t.jobId&&tickets.some(x=>x.id===t.jobId))return send().catch(()=>{});
+    const kind=sel("mKind",[["installation","Installation"],["repair","Repair"]],"installation"),amt=inp("mAmt","text",t.amount,{inputmode:"decimal",placeholder:"$0.00"});
+    return openMini("Estimate won – "+cust(t.customerId).name,
+      [el("p",{style:"margin:0 0 14px;color:var(--ink-2)"},"A job ticket will be created and put in Needs scheduling, with the customer, address and details carried over."),fld("The job is a",kind),fld("Agreed price",amt,"(optional)")],
+      [btn("Cancel","",closeMini),btn("Mark won + create job","primary",async()=>{const r=await send({jobKind:kind.value,amount:amt.value});closeMini();toast(r.jobNumber?"Job ticket T-"+r.jobNumber+" created – it's waiting to be scheduled":"Marked won")})]);
+  }
+  if(stage==="lost"){
+    const why=sel("mWhy",[["",'Choose a reason'],...["Price too high","Went with another company","No response","Decided not to do the work","Insurance didn't cover it","Other"].map(x=>[x,x])],""),more=area("mMore","","Anything worth remembering for next time?");
+    return openMini("Mark estimate lost",[fld("Why was it lost?",why),fld("Notes",more,"(optional)"),el("p",{class:"panel-note"},"It moves to Lost estimates, where you can review or reopen it any time.")],
+      [btn("Cancel","",closeMini),btn("Mark lost","primary",async()=>{await send({lostReason:[why.value,more.value.trim()].filter(Boolean).join(" – ")});closeMini();toast("Moved to Lost estimates")})]);
+  }
+  if(stage==="followup"){
+    const d=inp("mFu","date",ymd(new Date(Date.now()+3*864e5)));
+    return openMini("Needs follow-up",[fld("Follow up on",d),S().autoTasks?el("p",{class:"panel-note"},"A follow-up task will be added to the task board for "+S().officeAssignee+", due that day."):null],
+      [btn("Cancel","",closeMini),btn("Save","primary",async()=>{await send({followUp:d.value});closeMini()})]);
+  }
+  send().then(()=>{if(S().autoTasks&&stage==="completed")toast("Completed – a Send invoice task was added for "+S().officeAssignee);else if(S().autoTasks&&stage==="visited")toast("Visited – a Send estimate task was added for "+S().officeAssignee)}).catch(()=>{});
+}
+async function openReminder(t){
+  let d;try{d=await api("/api/remind",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:t.id,preview:true})})}catch(e){return}
+  const c=cust(t.customerId),text=area("mText",d.text);text.style.minHeight="130px";
+  const err=el("div",{class:"err",role:"alert"});
+  const viaPhone=async()=>{location.href=smsHref(c.phone)+"?&body="+encodeURIComponent(text.value.trim());await op({op:"reminded",id:t.id});closeMini()};
+  openMini("Text reminder – "+c.name,
+    [el("p",{style:"margin:0 0 12px;color:var(--ink-2)"},"To "+(c.phone||"(no phone)")+(t.date?" · scheduled "+whenLabel(t):"")),fld("Message",text),
+     d.configured?null:el("p",{class:"panel-note"},"Automatic texting isn't connected yet, so this opens your phone's Messages app with the text filled in."),err],
+    [btn("Cancel","",closeMini),
+     d.configured?btn("Use my phone instead","",viaPhone):null,
+     d.configured?btn("Send text","primary",async()=>{try{const r=await api("/api/remind",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:t.id,text:text.value.trim()})});applyBoard(r.board);closeMini();toast("Reminder texted to "+c.name)}catch(e){err.textContent=e.message||"Couldn't send."}}):btn("Open in Messages","primary",viaPhone)]);
+}
+function openCustomerForm(c){
+  const n=inp("mcName","text",c&&c.name),p=inp("mcPhone","tel",c&&c.phone),e=inp("mcEmail","email",c&&c.email),a=inp("mcAddr","text",c&&c.address,{placeholder:"Street, town, state, ZIP"}),no=area("mcNotes",c&&c.notes,"Gate codes, dogs, preferences, who to ask for…");
+  const ok=chk("mcSms","OK to text this customer",!c||c.smsOk!==false),err=el("div",{class:"err",role:"alert"});
+  openMini(c?"Edit customer":"New customer",[fld("Name",n),el("div",{class:"grid2"},fld("Mobile phone",p),fld("Email",e)),fld("Address",a),fld("Notes",no),ok,err],
+    [c&&!tickets.some(t=>t.customerId===c.id)?btn("Delete","danger",async()=>{if(!confirm("Delete "+c.name+"?"))return;await op({op:"customerDelete",id:c.id});closeMini();closeDetail()}):null,
+     btn("Cancel","",closeMini),
+     btn(c?"Save changes":"Save customer","primary",async()=>{if(!n.value.trim()){err.textContent="Enter the customer's name.";return}
+       const r=await op({op:"customerSave",id:c?c.id:"",data:{name:n.value,phone:p.value,email:e.value,address:a.value,notes:no.value,smsOk:ok.querySelector("input").checked}});closeMini();toast("Customer saved");if(!c&&r.id)openCustomer(r.id)})]);
+}
+function openSettings(){
+  const s=S();
+  const shop=inp("msShop","text",s.shopAddress,{placeholder:"Street, town, state, ZIP"}),ph=inp("msPhone","tel",s.companyPhone),who=sel("msWho",PEOPLE.map(p=>[p.name,p.name+" – "+p.role]),s.officeAssignee);
+  const auto=chk("msAuto","Add office tasks automatically (send estimate, follow up, send invoice, confirm payment)",s.autoTasks);
+  const sms=chk("msSms","Text customers automatically the evening before a scheduled visit",s.autoSms);
+  const days=el("div",{class:"toggle-row"},...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>{const c=el("input",{type:"checkbox",name:"msSkip",value:String(i)});c.checked=s.skipDays.includes(i);return el("label",{class:"toggle"},c,el("span",null,d))}));
+  const tpl=area("msTpl",s.smsTemplate);tpl.style.minHeight="120px";
+  openMini("Settings",[
+    fld("Shop address",shop,"(where routes start)"),fld("Company phone",ph,"(shown in reminder texts)"),
+    auto,fld("Automatic office tasks go to",who),
+    el("p",{class:"group-title",style:"margin-top:8px"},"Reminder texts"),
+    el("p",{class:"panel-note"},smsReady?"Texting is connected.":"Texting isn't connected yet (needs a Twilio account – see the README). Until then, Text reminder opens your own phone's Messages app."),
+    sms,el("div",{class:"field"},el("span",{class:"lab"},"Never send automatic texts on these evenings"),days),
+    fld("Message",tpl,"– you can use {first} {when} {time} {service} {address} {company_phone}")],
+    [btn("Cancel","",closeMini),btn("Save settings","primary",async()=>{
+      await op({op:"settings",data:{shopAddress:shop.value,companyPhone:ph.value,officeAssignee:who.value,autoTasks:auto.querySelector("input").checked,autoSms:sms.querySelector("input").checked,
+        skipDays:[...document.querySelectorAll('input[name="msSkip"]:checked')].map(i=>+i.value),smsTemplate:tpl.value}});closeMini();toast("Settings saved")})]);
+}
+
+// ---------- ticket + customer drawers ----------
+function openTicket(id){openKind="ticket";openId=id;$("#noteText").value="";renderDetail();$("#ovDetail").classList.add("open");$("#detail").classList.add("open");$("#dBody").scrollTop=0}
+function openCustomer(id){openKind="customer";openId=id;renderDetail();$("#ovDetail").classList.add("open");$("#detail").classList.add("open");$("#dBody").scrollTop=0}
+function setDrawer(title,canEdit,canNote,nodes){
+  $("#dTitle").textContent=title;$("#dEdit").hidden=!canEdit;$("#postingAs").hidden=!canNote;$(".compose").hidden=!canNote;
+  const b=$("#dBody"),sc=b.scrollTop;b.replaceChildren(...nodes.filter(Boolean));b.scrollTop=sc;
+}
+function ticketRow(t){
+  const st=stageOf(t);
+  return el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,tnum(t)+(t.amount?" · "+t.amount:"")),el("small",null,[t.address,t.date?whenLabel(t):""].filter(Boolean).join(" · "))),
+    el("div",{class:"side"},el("span",{class:"chip",style:"background:"+st.color+";color:#fff"},st.label)));
+}
+function renderTicketDetail(){
+  const t=tickets.find(x=>x.id===openId);
+  if(!t)return setDrawer("Ticket",false,false,[el("p",{class:"empty"},"This ticket was deleted.")]);
+  const c=cust(t.customerId),isEst=t.kind==="estimate",go=s=>()=>goStage(t,s);
+  const chips=ticketChips(t);chips.className="d-chips";for(const f of ticketFlags(t))chips.append(f);
+  const next=el("div",{class:"next"});
+  const add=(label,stage,cls)=>next.append(el("button",{type:"button",class:"btn "+(cls||"primary"),onclick:typeof stage==="function"?stage:go(stage)},label));
+  if(t.stage==="ticket")add(isEst?"Schedule the visit":"Schedule this job",()=>openSchedule(t));
+  else if(isEst){
+    if(t.stage==="scheduled")add("Mark visited","visited");
+    else if(t.stage==="visited")add("Mark estimate sent","sent");
+    else if(t.stage==="sent"){add("Won","won");add("Needs follow-up","followup"," ");add("Lost","lost","danger")}
+    else if(t.stage==="followup"){add("Won","won");add("Lost","lost","danger")}
+    else if(t.stage==="won"&&t.jobId&&tickets.some(x=>x.id===t.jobId))add("Open the job ticket",()=>openTicket(t.jobId));
+    else if(t.stage==="lost")add("Reopen – put back in follow-up","followup");
+  }else{
+    if(t.stage==="scheduled")add("Mark completed","completed");
+    else if(t.stage==="completed")add("Mark billed","billed");
+    else if(t.stage==="billed")add("Mark paid / closed","paid");
+  }
+  const seg=el("div",{class:"status-seg stage-seg",role:"group","aria-label":"Stage"});
+  for(const s of (isEst?[...EST_STAGES,LOST]:JOB_STAGES)){const on=t.stage===s.id;seg.append(el("button",{type:"button","aria-pressed":String(on),style:on?"background:"+s.color+";border-color:"+s.color:"",onclick:go(s.id)},s.label))}
+  const info=el("dl",{class:"info"});
+  const row=(k,v)=>{if(v==null||v==="")return;info.append(el("dt",null,k),el("dd",null,v))};
+  row("Customer",t.customerId&&c.id?el("button",{type:"button",class:"linkbtn",onclick:()=>openCustomer(c.id)},c.name):c.name);
+  if(c.phone)row("Phone",el("span",null,el("a",{href:"tel:"+c.phone.replace(/[^\d+]/g,"")},c.phone),"  ·  ",el("a",{href:smsHref(c.phone)},"Text")));
+  if(c.email)row("Email",el("a",{href:"mailto:"+c.email},c.email));
+  if(t.address)row("Job site",el("a",{href:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address),target:"_blank",rel:"noopener"},t.address));
+  row("Scheduled",el("span",{style:"display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap"},t.date?el("span",{class:"due "+(isStale(t)?"late":"")},parseDue(t.date).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"})+(t.time?" · "+fmtTime(t.time):"")):"Not on the schedule yet",
+    ["paid","won","lost"].includes(t.stage)?null:el("button",{type:"button",class:"btn sm",onclick:()=>openSchedule(t)},t.date?"Reschedule":"Schedule")));
+  row("Who's going",t.assignee?el("span",{style:"display:inline-flex;align-items:center;gap:8px"},av(t.assignee),t.assignee):"");
+  row("Amount",t.amount);
+  if(t.stage==="scheduled")row("Reminder",reminderBit(t));
+  if(t.stage==="followup"&&t.followUp)row("Follow up on",fmtDay(t.followUp));
+  if(t.stage==="lost")row("Why lost",t.lostReason||"No reason given");
+  const from=tickets.find(x=>x.id===t.fromEstimateId),job=tickets.find(x=>x.id===t.jobId);
+  if(from)row("From estimate",el("button",{type:"button",class:"linkbtn",onclick:()=>openTicket(from.id)},tnum(from)));
+  if(job)row("Job ticket",el("button",{type:"button",class:"linkbtn",onclick:()=>openTicket(job.id)},tnum(job)+" · "+stageOf(job).label));
+  if(c.notes)row("Customer notes",c.notes);
+  const nodes=[chips,el("p",{class:"d-title"},c.name+" – "+(KINDS[t.kind]||"")),el("div",{class:"d-sub"},"Created by "+(t.createdBy||"someone")+" · "+fmtStamp(t.createdAt||Date.now())),next.childNodes.length?next:null,seg,info];
+  if(t.description)nodes.push(el("div",{class:"sec"},"What's needed"),el("div",{class:"desc"},t.description));
+  // linked office tasks
+  const linked=tasks.filter(x=>x.ticketId===t.id).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const tl=el("div",{class:"rowlist flush"});
+  for(const x of linked){const st=STATUSES.find(s=>s.id===(x.status||"todo"))||STATUSES[0];
+    tl.append(el("div",{class:"row"+(x.status==="done"?" done":"")},el("button",{type:"button",class:"grow",onclick:()=>openDetail(x.id)},el("b",null,"#"+x.number+" "+typeLabel(x.type)),el("small",null,[x.assignee,x.due?fmtDue(x.due):""].filter(Boolean).join(" · "))),el("div",{class:"side"},el("span",{class:"chip",style:"background:"+st.color+";color:#fff"},st.label))))}
+  tl.append(el("button",{type:"button",class:"btn",style:"align-self:flex-start",onclick:()=>openForm(null,{ticket:t})},"+ Add a task for this ticket"));
+  nodes.push(el("div",{class:"sec"},"Office tasks",el("span",{class:"n"},String(linked.length))),tl);
+  nodes.push(...photoAndNoteNodes(t.id));
+  nodes.push(el("div",{style:"margin-top:28px"},el("button",{class:"btn danger",type:"button",onclick:()=>deleteTicket(t)},"Delete ticket")));
+  setDrawer("Ticket "+tnum(t),true,true,nodes);
+}
+function photoAndNoteNodes(id){
+  const ps=photos.filter(p=>p.taskId===id).sort((a,b)=>a.at-b.at);
+  const grid=el("div",{class:"photos"});
+  for(const p of ps)grid.append(photoTile(p));
+  const fi=el("input",{type:"file",accept:"image/*",multiple:true,"aria-label":"Add photos"});fi.onchange=()=>{addPhotos(id,[...fi.files]);fi.value=""};
+  grid.append(el("label",{class:"add-ph"},el("span",null,"+ Add photos"),fi));
+  const ns=notes.filter(n=>n.taskId===id).sort((a,b)=>a.at-b.at);
+  const list=el("div",{class:"notes"});
+  if(!ns.length)list.append(el("div",{class:"empty",style:"text-align:left;padding:4px 0"},"No notes yet. Post the first update below."));
+  for(const n of ns){
+    if(n.kind==="activity")list.append(el("div",{class:"note act"},el("span",{class:"ico"},el("i")),el("div",null,el("b",{style:"color:var(--ink-2)"},n.by)," "+n.text+" · ",el("time",null,fmtStamp(n.at)))));
+    else list.append(el("div",{class:"note"},av(n.by),el("div",{class:"note-b"},el("div",{class:"note-h"},el("b",null,n.by),el("time",null,fmtStamp(n.at))),el("div",{class:"note-t"},n.text))));
+  }
+  return[el("div",{class:"sec"},"Photos",el("span",{class:"n"},String(ps.length))),grid,el("div",{class:"sec"},"Notes & updates",el("span",{class:"n"},String(ns.filter(n=>n.kind!=="activity").length))),list];
+}
+async function deleteTicket(t){
+  if(!confirm("Delete ticket "+tnum(t)+" for "+cust(t.customerId).name+"? Its notes and photos go with it. This can't be undone."))return;
+  try{await op({op:"ticketDelete",id:t.id});closeDetail();toast("Ticket deleted")}catch(e){}
+}
+function renderCustomerDetail(){
+  const c=customers.find(x=>x.id===openId);
+  if(!c)return setDrawer("Customer",false,false,[el("p",{class:"empty"},"This customer was deleted.")]);
+  const info=el("dl",{class:"info"});
+  const row=(k,v)=>{if(v==null||v==="")return;info.append(el("dt",null,k),el("dd",null,v))};
+  if(c.phone)row("Phone",el("span",null,el("a",{href:"tel:"+c.phone.replace(/[^\d+]/g,"")},c.phone),"  ·  ",el("a",{href:smsHref(c.phone)},"Text")));
+  if(c.email)row("Email",el("a",{href:"mailto:"+c.email},c.email));
+  if(c.address)row("Address",el("a",{href:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(c.address),target:"_blank",rel:"noopener"},c.address));
+  row("Reminder texts",c.smsOk===false?"Do not text":"OK to text");
+  const mine=tickets.filter(t=>t.customerId===c.id).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const paid=mine.filter(t=>t.stage==="paid").reduce((n,t)=>n+money(t.amount),0);
+  if(paid)row("Paid work to date","$"+Math.round(paid).toLocaleString());
+  const tl=el("div",{class:"rowlist flush"});
+  if(!mine.length)tl.append(el("div",{class:"empty",style:"text-align:left;padding:4px 0"},"No tickets for this customer yet."));
+  for(const t of mine)tl.append(ticketRow(t));
+  setDrawer("Customer",true,false,[el("p",{class:"d-title"},c.name),el("div",{class:"d-sub"},"Customer since "+new Date(c.createdAt||Date.now()).toLocaleDateString(undefined,{month:"short",year:"numeric"})),
+    el("div",{class:"next"},el("button",{type:"button",class:"btn primary",onclick:()=>openTicketForm(null,{customer:c})},"+ New ticket for this customer")),info,
+    c.notes?el("div",{class:"sec"},"Notes"):null,c.notes?el("div",{class:"desc"},c.notes):null,
+    el("div",{class:"sec"},"Tickets",el("span",{class:"n"},String(mine.length))),tl]);
+}
+
+// ---------- ticket form ----------
+function attachSuggest(input,box,onPick){
+  const hide=()=>{box.hidden=true;box.replaceChildren()};
+  input.addEventListener("input",()=>{
+    const q=input.value.trim().toLowerCase();if(q.length<2)return hide();
+    const hits=customers.filter(c=>[c.name,c.phone,c.address].join(" ").toLowerCase().includes(q)).slice(0,6);
+    if(!hits.length)return hide();
+    box.replaceChildren(...hits.map(c=>el("button",{type:"button",onpointerdown:e=>{e.preventDefault();onPick(c);hide()}},el("b",null,c.name),el("small",null,[c.phone,c.address].filter(Boolean).join(" · ")))));box.hidden=false;
+  });
+  input.addEventListener("blur",()=>setTimeout(hide,200));
+}
+function fillTicketCustomer(c){tCustId=c.id;$("#tCustomer").value=c.name||"";$("#tPhone").value=c.phone||"";$("#tEmail").value=c.email||"";$("#tSmsOk").checked=c.smsOk!==false;if(!$("#tAddress").value)$("#tAddress").value=c.address||""}
+attachSuggest($("#tCustomer"),$("#tSuggest"),fillTicketCustomer);
+$("#tCustomer").addEventListener("input",()=>{if(!tEditing)tCustId=""});
+function openTicketForm(t,pre){
+  if(!requireMe())return;
+  pre=pre||{};tEditing=t?t.id:null;tCustId=t?t.customerId||"":"";tFromTask=pre.task?pre.task.id:"";
+  $("#tTitle").textContent=t?"Edit ticket "+tnum(t):"New ticket";$("#tSave").textContent=t?"Save changes":"Create ticket";
+  const c=t?cust(t.customerId):pre.customer||{},k=pre.task||{};
+  setRadio("tkind",t?t.kind:k.kind==="Repair"?"repair":k.kind==="Installation"?"installation":k.type==="estimate"?"estimate":"");
+  document.querySelectorAll('input[name="tkind"]').forEach(i=>i.disabled=!!t&&((t.kind==="estimate")!==(i.value==="estimate")));
+  const trades=t?t.trades:k.trades;document.querySelectorAll('input[name="ttrade"]').forEach(i=>i.checked=(trades||[]).includes(i.value));
+  $("#tCustomer").value=c.name||k.customer||"";$("#tPhone").value=c.phone||k.phone||"";$("#tEmail").value=c.email||k.email||"";$("#tSmsOk").checked=c.smsOk!==false;
+  $("#tAddress").value=t?t.address||"":c.address||k.address||"";$("#tDesc").value=t?t.description||"":k.description||"";$("#tAmount").value=t?t.amount||"":k.amount||"";
+  $("#tDate").value=t?t.date||"":pre.date||"";$("#tTime").value=t?t.time||"":"";$("#tAssignee").value=t?t.assignee||"":"";
+  if(pre.customer)tCustId=pre.customer.id;
+  $("#tErr").textContent="";$("#tSuggest").hidden=true;
+  $("#ovTForm").classList.add("open");$("#tform").classList.add("open");
+}
+function closeTicketForm(){$("#ovTForm").classList.remove("open");$("#tform").classList.remove("open");tEditing=null}
+$("#tClose").onclick=closeTicketForm;$("#tCancel").onclick=closeTicketForm;$("#ovTForm").onclick=closeTicketForm;
+$("#tSave").onclick=async()=>{
+  const data={kind:getRadio("tkind"),trades:[...document.querySelectorAll('input[name="ttrade"]:checked')].map(i=>i.value),
+    customerId:tCustId,customer:{name:$("#tCustomer").value,phone:$("#tPhone").value,email:$("#tEmail").value,smsOk:$("#tSmsOk").checked},
+    address:$("#tAddress").value,description:$("#tDesc").value,amount:$("#tAmount").value,date:$("#tDate").value,time:$("#tTime").value,assignee:$("#tAssignee").value,fromTaskId:tFromTask};
+  const miss=[];if(!data.kind)miss.push("choose estimate, repair or installation");if(!data.customer.name.trim())miss.push("enter the customer's name");
+  if(miss.length){$("#tErr").textContent="Please "+miss.join(" and ")+".";return}
+  $("#tSave").disabled=true;
+  try{
+    if(tEditing){await op({op:"ticketUpdate",id:tEditing,data});closeTicketForm();toast("Changes saved")}
+    else{const r=await op({op:"ticketCreate",data});closeTicketForm();toast("Ticket T-"+r.number+" created"+(data.date?" and scheduled":" – it's waiting to be scheduled"));if(jv.main!=="jobs")setMain("jobs");if(r.id)openTicket(r.id)}
+  }catch(e){if(e.message&&e.shown)$("#tErr").textContent=e.message}
+  $("#tSave").disabled=false;
+};
+attachSuggest($("#iCustomer"),$("#iSuggest"),c=>{$("#iCustomer").value=c.name||"";if(!$("#iPhone").value)$("#iPhone").value=c.phone||"";if(!$("#iEmail").value)$("#iEmail").value=c.email||"";if(!$("#iAddress").value)$("#iAddress").value=c.address||""});
+
 // ---------- boot ----------
-renderMe();render();
+renderMe();setMain(jv.main);
 (async()=>{
   try{
     const r=await fetch("/api/auth",{credentials:"same-origin",cache:"no-store"});const d=await r.json();
-    if(d.ok){authed=true;me=d.name||"";renderMe();await refresh()}else showLogin();
+    if(d.ok){authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();await refresh()}else showLogin();
   }catch(e){notice("You're offline. Connect to the internet to load the board.")}
 })();
 })();
