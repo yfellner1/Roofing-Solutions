@@ -281,6 +281,8 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .chip.k-estimate{background:#6B4E9B;color:#fff}
 .chip.muted{background:var(--surface-2);color:var(--muted);border:1px solid var(--line);font-weight:600}
 .btn{text-decoration:none}
+a.btn{color:inherit}
+a.btn.primary{color:var(--red-ink)}
 .btn.sm{min-height:32px;padding:4px 10px;font-size:13px}
 .next{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .next .btn{flex:1 1 auto}
@@ -341,6 +343,75 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
   .row{flex-wrap:wrap}
   .row .side{width:100%;justify-content:flex-start}
 }
+
+/* ---------- Today, My day, calendar, drag and drop ---------- */
+.card{cursor:pointer;user-select:none}
+.dragging{opacity:.45}
+.drop-on{outline:2px dashed var(--red);outline-offset:-3px;background:var(--red-soft)!important}
+.wide{display:inline}
+.today-wrap{max-width:1480px;margin:0 auto;padding:16px 20px 48px}
+.today-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.today-head h2{font-family:var(--display);font-size:30px;line-height:1.05;margin:0;margin-right:auto}
+.today-head h2 small{display:block;font-family:var(--body);font-size:14px;font-weight:500;color:var(--muted);margin-top:4px}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.tile{display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);min-height:84px}
+.tile:hover{border-color:var(--line-2)}
+.tile b{font-family:var(--display);font-size:34px;line-height:1}
+.tile span{font-weight:600;font-size:14px}
+.tile small{color:var(--muted);font-size:12.5px}
+.tile.hot b{color:var(--red)}
+.today-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:16px;align-items:start}
+.today-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.mystop{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.mystop.done{opacity:.65}
+.mystop-top{display:flex;gap:10px;align-items:flex-start}
+.mystop-top h3{margin:0;font-size:18px;line-height:1.25}
+.mystop-top .when{margin-left:auto;font-weight:700;white-space:nowrap;font-size:14px}
+.mystop p{margin:6px 0 0;font-size:14.5px;color:var(--ink-2)}
+.mystop .acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.mystop .acts .btn{min-height:50px;font-size:15px;padding:6px 4px;position:relative;text-align:center}
+.mystop .acts .btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--siding-bg);color:var(--ink);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.banner span{flex:1 1 220px}
+.reason{color:var(--warn);font-weight:600}
+.cal-head{max-width:1480px;margin:0 auto;padding:14px 20px 0;font-family:var(--display);font-size:24px;font-weight:700}
+.cal-scroll{max-width:1480px;margin:0 auto;padding:10px 20px 0;overflow-x:auto}
+.wk{display:grid;grid-template-columns:120px repeat(7,minmax(128px,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line);gap:1px;min-width:1020px}
+.wk>div{background:var(--surface);padding:6px;min-height:44px}
+.wk .wk-h{background:var(--surface-2);font-weight:700;font-size:13px;text-align:center;padding:8px 4px}
+.wk .wk-h button{all:unset;cursor:pointer;display:block;width:100%}
+.wk .wk-h.today{color:var(--red)}
+.wk .wk-who{background:var(--surface-2);font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px}
+.wk .wk-cell{display:flex;flex-direction:column;gap:4px;min-height:72px}
+.cal-chip{display:block;border:1px solid var(--line);border-left:4px solid var(--ink);border-radius:6px;padding:4px 6px;background:var(--surface-2);font-size:12.5px;line-height:1.3;cursor:pointer;overflow:hidden}
+.cal-chip b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-chip small{color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-chip.k-estimate{border-left-color:#6B4E9B}
+.cal-chip.k-repair{border-left-color:var(--siding)}
+.cal-chip.k-installation{border-left-color:var(--red)}
+.cal-chip.done{opacity:.55}
+.mo{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line);gap:1px}
+.mo>div{background:var(--surface);min-height:104px;padding:4px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.mo .mo-h{min-height:0;background:var(--surface-2);font-weight:700;font-size:12.5px;text-align:center;padding:6px 2px}
+.mo .out{background:var(--surface-2)}
+.mo .out .dn{color:var(--muted)}
+.mo .dn{all:unset;cursor:pointer;font-weight:700;font-size:13px;padding:0 4px;align-self:flex-start;border-radius:999px}
+.mo .today .dn{background:var(--red);color:#fff}
+.mo .more{all:unset;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;padding:0 4px}
+.cal-below{max-width:1480px;margin:0 auto;padding:14px 20px 40px}
+@media (max-width:900px){
+  .wide{display:none}
+  .today-wrap{padding:12px 14px 40px}
+  .today-head h2{font-size:26px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .tile b{font-size:28px}
+  .tile:last-child{grid-column:span 2}
+  .today-grid{grid-template-columns:1fr}
+  .cal-head,.cal-scroll,.cal-below{padding-left:14px;padding-right:14px}
+  .mo>div{min-height:64px}
+  .mo .cal-chip small{display:none}
+  .mo .cal-chip{padding:2px 4px;font-size:11px;border-left-width:3px}
+}
 </style>
 </head>
 <body>
@@ -354,8 +425,9 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
       </div>
     </div>
     <nav class="maintabs" role="tablist" aria-label="Section">
-      <button type="button" role="tab" id="mtTasks" aria-selected="true">Tasks <span class="count" id="mtTasksN" hidden></span></button>
-      <button type="button" role="tab" id="mtJobs" aria-selected="false">Jobs &amp; Estimates <span class="count" id="mtJobsN" hidden></span></button>
+      <button type="button" role="tab" id="mtToday" aria-selected="true">Today</button>
+      <button type="button" role="tab" id="mtTasks" aria-selected="false">Tasks <span class="count" id="mtTasksN" hidden></span></button>
+      <button type="button" role="tab" id="mtJobs" aria-selected="false">Jobs<span class="wide"> &amp; Estimates</span> <span class="count" id="mtJobsN" hidden></span></button>
     </nav>
     <div class="top-actions">
       <button class="btn" id="installBtn" type="button" hidden>Install app</button>
@@ -374,7 +446,9 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 
 <div class="notice" id="notice" hidden><div id="noticeText"></div></div>
 
-<div id="viewTasks">
+<div id="viewToday"></div>
+
+<div id="viewTasks" hidden>
 <div class="toolbar">
   <div class="search">
     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -429,9 +503,19 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
       <button class="btn" id="sNext" type="button" aria-label="Next day">›</button>
       <label class="sr" for="sDay">Day</label><input id="sDay" type="date">
       <label class="sr" for="sCrew">Crew</label><select id="sCrew"><option value="">All crews</option></select>
+      <div class="seg" id="calSeg" role="group" aria-label="Calendar view" style="margin-left:auto">
+        <button type="button" data-cal="day" aria-pressed="true">Day</button>
+        <button type="button" data-cal="week" aria-pressed="false">Week</button>
+        <button type="button" data-cal="month" aria-pressed="false">Month</button>
+      </div>
     </div>
     <div class="week" id="week"></div>
-    <div class="sched-grid">
+    <div id="calWrap" hidden>
+      <div class="cal-head" id="calTitle"></div>
+      <div class="cal-scroll" id="calGrid"></div>
+      <div class="cal-below" id="calBelow"></div>
+    </div>
+    <div class="sched-grid" id="schedGrid">
       <div class="panel" id="schedDay"></div>
       <div class="panel" id="schedUn"></div>
     </div>
@@ -619,6 +703,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
   <div class="sheet-body">
     <p style="margin:0 0 14px;color:var(--ink-2)">You're signed in as:</p>
     <div class="who-grid" id="whoGrid"></div>
+    <div id="pushBox"></div>
     <p style="margin:20px 0 0;text-align:center"><button class="btn ghost" id="signOut" type="button" style="color:var(--muted)">Sign out of this device</button></p>
   </div>
 </div>
@@ -727,7 +812,7 @@ async function op(payload){
   const d=await api("/api/op",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(Object.assign({by:me},payload))});
   applyBoard(d.board);return d.result||{};
 }
-setInterval(()=>{if(document.visibilityState==="visible")refresh()},20000);
+setInterval(()=>{if(document.visibilityState==="visible"&&!dragSrc)refresh()},20000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh()});
 window.addEventListener("online",()=>{notice("");refresh()});
 
@@ -740,11 +825,11 @@ $("#loginForm").addEventListener("submit",async e=>{
     const r=await fetch("/api/auth",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({pin})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){$("#loginErr").textContent=d.error||"Couldn't sign in. Try again.";}
-    else{authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();$("#login").hidden=true;$("#pin").value="";await refresh()}
+    else{authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();$("#login").hidden=true;$("#pin").value="";await refresh();initPushHint()}
   }catch(err){$("#loginErr").textContent="No connection. Check your internet and try again."}
   $("#loginBtn").disabled=false;
 });
-async function signOut(){await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";tasks=[];notes=[];photos=[];tickets=[];customers=[];closeWho();renderMe();render();showLogin()}
+async function signOut(){await disablePush();await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";tasks=[];notes=[];photos=[];tickets=[];customers=[];closeWho();renderMe();render();showLogin()}
 
 // ---------- selects ----------
 for(const p of PEOPLE){$("#fWho").append(el("option",{value:p.name},p.name));$("#iAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
@@ -757,6 +842,7 @@ function openWho(){
   const g=$("#whoGrid");g.replaceChildren();
   const p=person(me);
   g.append(el("div",{class:"who-card"},av(me),el("span",null,el("b",null,me),el("small",null,p.role))));
+  renderPushBox();
   $("#ovWho").classList.add("open");$("#who").classList.add("open");
 }
 function closeWho(){$("#ovWho").classList.remove("open");$("#who").classList.remove("open")}
@@ -820,7 +906,7 @@ function cardFor(t){
   if(t.due)foot.append(el("span",{class:"due "+dueClass(t)},fmtDue(t.due)));
   if(nCount)foot.append(el("span",{class:"meta",title:nCount+" notes"},svgNote(),String(nCount)));
   if(pCount)foot.append(el("span",{class:"meta",title:pCount+" photos"},svgCam(),String(pCount)));
-  return el("button",{type:"button",class:"card"+(dueClass(t)==="late"?" overdue":""),onclick:()=>openDetail(t.id)},top,el("h3",null,title),el("div",{class:"sub"},sub),flags.childNodes.length?flags:null,foot);
+  return cardNode("card"+(dueClass(t)==="late"?" overdue":""),()=>openDetail(t.id),"task",t.id,top,el("h3",null,title),el("div",{class:"sub"},sub),flags.childNodes.length?flags:null,foot);
 }
 function render(){
   const list=filtered();const board=$("#board"),tabs=$("#tabs");board.replaceChildren();tabs.replaceChildren();
@@ -829,13 +915,14 @@ function render(){
     const body=el("div",{class:"col-body"});
     if(!items.length)body.append(el("div",{class:"empty"},!loadedOnce?"Loading…":s.id==="todo"?(tasks.length?"Nothing to do here.":"No tasks yet. Use New task to add the first one."):"Nothing here."));
     for(const t of items)body.append(cardFor(t));
-    board.append(el("section",{class:"col"+(view.tab===s.id?" active":""),"aria-label":s.label},el("div",{class:"col-head"},el("span",{class:"dot",style:"background:"+s.color}),el("h2",null,s.label),el("span",{class:"n"},String(items.length))),body));
+    board.append(dropZone(el("section",{class:"col"+(view.tab===s.id?" active":""),"aria-label":s.label},el("div",{class:"col-head"},el("span",{class:"dot",style:"background:"+s.color}),el("h2",null,s.label),el("span",{class:"n"},String(items.length))),body),
+      src=>src.type==="task",src=>{const t=tasks.find(x=>x.id===src.id);if(t&&(t.status||"todo")!==s.id)op({op:"status",id:t.id,status:s.id}).catch(()=>{})}));
     tabs.append(el("button",{type:"button",role:"tab","aria-selected":String(view.tab===s.id),onclick:()=>{view.tab=s.id;render()}},s.label,el("span",{style:"opacity:.7"},String(items.length))));
   }
   const mine=tasks.filter(t=>t.assignee===me&&t.status!=="done").length;
   $("#mineCount").textContent=mine;$("#mineCount").hidden=!mine||!me;
   $("#mtTasksN").textContent=mine;$("#mtTasksN").hidden=!mine||!me;
-  renderJobs();
+  renderJobs();renderToday();
   if(openId)renderDetail();
 }
 $("#q").addEventListener("input",e=>{view.q=e.target.value;render()});
@@ -1030,24 +1117,26 @@ const daysSince=ms=>Math.floor((Date.now()-(ms||Date.now()))/864e5);
 const cust=id=>customers.find(c=>c.id===id)||{name:"(customer removed)"};
 const tnum=t=>"T-"+(t.number||"");
 const smsHref=p=>{const d=String(p||"").replace(/\D/g,"");return"sms:"+(d.length===10?"+1"+d:d.length===11?"+"+d:d)};
-const S=()=>Object.assign({shopAddress:"",shopLat:null,shopLng:null,companyPhone:"",smsTemplate:DEFAULT_SMS,autoSms:true,skipDays:[],autoTasks:true,officeAssignee:"Loriale"},settings);
+const S=()=>Object.assign({omwTemplate:"Hi {first}, this is Roofing Solutions. Our crew is on the way to {address} now. Questions? Call or text {company_phone}.",thanksTemplate:"Hi {first}, thank you for choosing Roofing Solutions! We appreciate your business. {review}",reviewLink:"",autoThanks:false,shopAddress:"",shopLat:null,shopLng:null,companyPhone:"",smsTemplate:DEFAULT_SMS,autoSms:true,skipDays:[],autoTasks:true,officeAssignee:"Loriale"},settings);
 
 let tickets=[],customers=[],settings={},smsReady=false;
-const jv={main:ls.get("rs_main")==="jobs"?"jobs":"tasks",sub:["tickets","schedule","customers","lost"].includes(ls.get("rs_sub"))?ls.get("rs_sub"):"tickets",pipe:ls.get("rs_pipe")==="est"?"est":"jobs",q:"",trade:"",who:"",tab:"ticket",day:ymd(new Date()),crew:"",cq:""};
+const jv={main:"today",cal:["week","month"].includes(ls.get("rs_cal"))?ls.get("rs_cal"):"day",sub:["tickets","schedule","customers","lost"].includes(ls.get("rs_sub"))?ls.get("rs_sub"):"tickets",pipe:ls.get("rs_pipe")==="est"?"est":"jobs",q:"",trade:"",who:"",tab:"ticket",day:ymd(new Date()),crew:"",cq:""};
 let tEditing=null,tCustId="",tFromTask="",formTicketId="";
 
 for(const p of PEOPLE){for(const s of ["#jWho","#sCrew"])$(s).append(el("option",{value:p.name},p.name));$("#tAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
 
 // ---------- navigation ----------
 function setMain(m){
-  jv.main=m;ls.set("rs_main",m);
-  $("#viewTasks").hidden=m!=="tasks";$("#viewJobs").hidden=m!=="jobs";
-  $("#newBtn").hidden=m!=="tasks";$("#newTicketBtn").hidden=m!=="jobs";
-  $("#mtTasks").setAttribute("aria-selected",String(m==="tasks"));$("#mtJobs").setAttribute("aria-selected",String(m==="jobs"));
+  jv.main=m;
+  $("#viewToday").hidden=m!=="today";$("#viewTasks").hidden=m!=="tasks";$("#viewJobs").hidden=m!=="jobs";
+  $("#newBtn").hidden=m==="jobs";$("#newTicketBtn").hidden=m==="tasks";
+  for(const [id,k] of [["#mtToday","today"],["#mtTasks","tasks"],["#mtJobs","jobs"]])$(id).setAttribute("aria-selected",String(m===k));
   render();
 }
 function setSub(s){jv.sub=s;ls.set("rs_sub",s);renderJobs()}
-$("#mtTasks").onclick=()=>setMain("tasks");$("#mtJobs").onclick=()=>setMain("jobs");
+$("#mtToday").onclick=()=>setMain("today");$("#mtTasks").onclick=()=>setMain("tasks");$("#mtJobs").onclick=()=>setMain("jobs");
+document.querySelectorAll("#calSeg [data-cal]").forEach(b=>b.onclick=()=>{jv.cal=b.dataset.cal;ls.set("rs_cal",jv.cal);renderJobs()});
+const stepDay=dir=>{if(jv.cal==="month"){const d=parseDue(jv.day);d.setDate(1);d.setMonth(d.getMonth()+dir);jv.day=ymd(d)}else jv.day=shiftDay(jv.day,dir*(jv.cal==="week"?7:1));renderJobs()};
 document.querySelectorAll("#subnav [data-sub]").forEach(b=>b.onclick=()=>setSub(b.dataset.sub));
 $("#pipeJobs").onclick=()=>{jv.pipe="jobs";jv.tab="ticket";ls.set("rs_pipe","jobs");renderJobs()};
 $("#pipeEst").onclick=()=>{jv.pipe="est";jv.tab="ticket";ls.set("rs_pipe","est");renderJobs()};
@@ -1055,8 +1144,8 @@ $("#jq").addEventListener("input",e=>{jv.q=e.target.value;renderJobs()});
 $("#jTrade").onchange=e=>{jv.trade=e.target.value;renderJobs()};
 $("#jWho").onchange=e=>{jv.who=e.target.value;renderJobs()};
 $("#cq").addEventListener("input",e=>{jv.cq=e.target.value;renderJobs()});
-$("#sPrev").onclick=()=>{jv.day=shiftDay(jv.day,-1);renderJobs()};
-$("#sNext").onclick=()=>{jv.day=shiftDay(jv.day,1);renderJobs()};
+$("#sPrev").onclick=()=>stepDay(-1);
+$("#sNext").onclick=()=>stepDay(1);
 $("#sToday").onclick=()=>{jv.day=ymd(new Date());renderJobs()};
 $("#sDay").onchange=e=>{if(e.target.value){jv.day=e.target.value;renderJobs()}};
 $("#sCrew").onchange=e=>{jv.crew=e.target.value;renderJobs()};
@@ -1108,7 +1197,7 @@ function ticketCard(t){
   const nCount=notes.filter(n=>n.taskId===t.id&&n.kind!=="activity").length,pCount=photos.filter(p=>p.taskId===t.id).length;
   if(nCount)foot.append(el("span",{class:"meta",title:nCount+" notes"},svgNote(),String(nCount)));
   if(pCount)foot.append(el("span",{class:"meta",title:pCount+" photos"},svgCam(),String(pCount)));
-  return el("button",{type:"button",class:"card"+(isStale(t)?" overdue":""),onclick:()=>openTicket(t.id)},top,el("h3",null,c.name),el("div",{class:"sub"},t.address||(t.description||"").slice(0,120)),flags.childNodes.length?flags:null,foot.childNodes.length?foot:null);
+  return cardNode("card"+(isStale(t)?" overdue":""),()=>openTicket(t.id),"ticket",t.id,top,el("h3",null,c.name),el("div",{class:"sub"},t.address||(t.description||"").slice(0,120)),flags.childNodes.length?flags:null,foot.childNodes.length?foot:null);
 }
 function tMatch(t){
   if(jv.trade&&!(t.trades||[]).includes(jv.trade))return false;
@@ -1136,8 +1225,9 @@ function renderPipeline(){
     if(!count)body.append(el("div",{class:"empty"},!loadedOnce?"Loading…":s.id==="ticket"&&!tickets.length?"No tickets yet. Use New ticket to add the first one.":"Nothing here."));
     for(const t of (closed?items.slice(0,30):items))body.append(ticketCard(t));
     if(closed&&count>30)body.append(el("div",{class:"empty"},"Showing the 30 most recent. Search to find older ones."));
-    board.append(el("section",{class:"col"+(jv.tab===s.id?" active":""),"aria-label":s.label},
-      el("div",{class:"col-head"},el("span",{class:"dot",style:"background:"+s.color}),el("h2",null,s.label),el("span",{class:"n"},total?el("span",{class:"sum"},"$"+Math.round(total).toLocaleString()+" · "):null,String(count))),body));
+    board.append(dropZone(el("section",{class:"col"+(jv.tab===s.id?" active":""),"aria-label":s.label},
+      el("div",{class:"col-head"},el("span",{class:"dot",style:"background:"+s.color}),el("h2",null,s.label),el("span",{class:"n"},total?el("span",{class:"sum"},"$"+Math.round(total).toLocaleString()+" · "):null,String(count))),body),
+      src=>{const t=src.type==="ticket"&&tickets.find(x=>x.id===src.id);return!!t&&(t.kind==="estimate")===isEst},src=>{const t=tickets.find(x=>x.id===src.id);if(t)goStage(t,s.id)}));
     tabs.append(el("button",{type:"button",role:"tab","aria-selected":String(jv.tab===s.id),onclick:()=>{jv.tab=s.id;renderJobs()}},s.label,el("span",{style:"opacity:.7"},String(count))));
   }
 }
@@ -1147,46 +1237,86 @@ const hasGeo=x=>x&&typeof x.lat==="number"&&typeof x.lng==="number";
 function miles(a,b){const R=3958.8,r=x=>x*Math.PI/180,dLa=r(b.lat-a.lat),dLn=r(b.lng-a.lng),h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 // Stops still to do come first, in route order; finished ones drop to the bottom.
 const dayStops=()=>tickets.filter(t=>t.date===jv.day&&t.stage!=="lost"&&(!jv.crew||t.assignee===jv.crew)).sort((a,b)=>((a.stage!=="scheduled")-(b.stage!=="scheduled"))||((a.ord==null?999:a.ord)-(b.ord==null?999:b.ord))||byWhen(a,b));
-function mapsUrl(stops){
-  const pts=stops.map(t=>t.address).filter(Boolean);if(!pts.length)return"";
-  const dest=pts.pop();
-  let u="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(dest);
-  if(S().shopAddress)u+="&origin="+encodeURIComponent(S().shopAddress);
-  if(pts.length)u+="&waypoints="+encodeURIComponent(pts.slice(0,9).join("|"));
-  return u;
+// Google Maps takes at most 10 places per link, so a long day is split into parts.
+function mapsUrls(stops){
+  const pts=stops.map(t=>t.address).filter(Boolean),out=[];let origin=S().shopAddress||"",i=0;
+  while(i<pts.length){
+    const chunk=pts.slice(i,i+10),from=i+1;i+=chunk.length;const dest=chunk.pop();
+    let u="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(dest);
+    if(origin)u+="&origin="+encodeURIComponent(origin);
+    if(chunk.length)u+="&waypoints="+encodeURIComponent(chunk.join("|"));
+    out.push({u,from,to:i});origin=dest;
+  }
+  return out;
 }
+const navUrl=addr=>"https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(addr);
 function reminderBit(t){
   if(t.stage!=="scheduled")return null;
   const c=cust(t.customerId),r=t.reminder&&t.reminder.forDate===t.date?t.reminder:null;
   if(!c.phone)return el("span",{class:"chip muted"},"No phone");
   if(c.smsOk===false)return el("span",{class:"chip muted"},"No texts");
   if(r&&r.status==="sent")return el("span",{class:"chip good",title:"Sent "+fmtStamp(r.at)},"Reminder texted");
-  return el("button",{type:"button",class:"btn sm",onclick:()=>openReminder(t)},r?"Retry text":"Text reminder");
+  return el("button",{type:"button",class:"btn sm",onclick:()=>openText(t,"reminder")},r?"Retry text":"Text reminder");
+}
+// Dropping a ticket on a day (and, in the week grid, on a person) schedules or moves it.
+function dropOnDay(src,day,crew){
+  const t=tickets.find(x=>x.id===src.id);if(!t)return;
+  if(t.stage!=="ticket"&&t.stage!=="scheduled"){toast("That one is already "+stageOf(t).label.toLowerCase()+" – open it to change the date.");return}
+  const who=crew===undefined?t.assignee||"":crew;
+  if(t.date===day&&who===(t.assignee||""))return;
+  op({op:"ticketSchedule",id:t.id,date:day,time:t.time||"",assignee:who}).then(()=>toast(cust(t.customerId).name+" → "+fmtDay(day)+(who?" · "+who:""))).catch(()=>{});
+}
+const isTicket=s=>s.type==="ticket";
+const weekStart=s=>{const d=parseDue(s);d.setDate(d.getDate()-d.getDay());return d};
+const onDay=k=>tickets.filter(t=>t.date===k&&t.stage!=="lost"&&(!jv.crew||t.assignee===jv.crew));
+function calChip(t,short){
+  const c=cust(t.customerId),done=t.stage!=="scheduled";
+  return cardNode("cal-chip k-"+t.kind+(done?" done":""),()=>openTicket(t.id),"ticket",t.id,
+    el("b",null,(t.time?fmtTime(t.time)+" ":"")+c.name),short?null:el("small",null,[KINDS[t.kind],(t.trades||[]).map(x=>TRADE_LABEL[x]).join(", "),done?stageOf(t).label:""].filter(Boolean).join(" · ")));
+}
+function waitingPanel(){
+  const un=tickets.filter(t=>t.stage==="ticket").sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const ul=el("div",{class:"rowlist flush"});
+  if(!un.length)ul.append(el("div",{class:"empty"},"Every ticket is on the schedule."));
+  for(const t of un){
+    const c=cust(t.customerId);
+    ul.append(draggable(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,t.address||(t.description||"").slice(0,80)||"No address yet"),
+      daysSince(t.stageAt)>=1?el("small",null,"Waiting "+daysSince(t.stageAt)+" day"+(daysSince(t.stageAt)===1?"":"s")):null),
+      el("div",{class:"side"},el("button",{type:"button",class:"btn sm",onclick:()=>openSchedule(t,jv.day)},jv.cal==="day"?"Add to "+parseDue(jv.day).toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"}):"Schedule"))),"ticket",t.id));
+  }
+  return[el("div",{class:"panel-head"},el("h2",null,"Needs scheduling"),el("span",{class:"n",style:"color:var(--muted);font-weight:600"},String(un.length))),
+    un.length&&window.innerWidth>900?el("p",{class:"panel-note"},"Drag one onto a day to schedule it."):null,ul].filter(Boolean);
 }
 function renderSchedule(){
   $("#sDay").value=jv.day;$("#sCrew").value=jv.crew;
+  document.querySelectorAll("#calSeg [data-cal]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.cal===jv.cal)));
+  const isDay=jv.cal==="day";
+  $("#week").hidden=!isDay;$("#schedGrid").hidden=!isDay;$("#calWrap").hidden=isDay;
+  if(jv.cal==="week")return renderWeekGrid();
+  if(jv.cal==="month")return renderMonthGrid();
   const tday=ymd(new Date());
-  const start=parseDue(jv.day);start.setDate(start.getDate()-start.getDay());
+  const start=weekStart(jv.day);
   const week=$("#week");week.replaceChildren();
   for(let i=0;i<7;i++){
-    const d=new Date(start);d.setDate(start.getDate()+i);const k=ymd(d);
-    const n=tickets.filter(t=>t.date===k&&t.stage!=="lost"&&(!jv.crew||t.assignee===jv.crew)).length;
-    week.append(el("button",{type:"button","aria-pressed":String(k===jv.day),class:k===tday?"today":"","aria-label":d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+", "+n+" stops",onclick:()=>{jv.day=k;renderJobs()}},
-      d.toLocaleDateString(undefined,{weekday:"short"}),el("b",null,String(d.getDate())),el("span",{class:"count"+(n?" on":"")},String(n))));
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=ymd(d),n=onDay(k).length;
+    week.append(dropZone(el("button",{type:"button","aria-pressed":String(k===jv.day),class:k===tday?"today":"","aria-label":d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+", "+n+" stops",onclick:()=>{jv.day=k;renderJobs()}},
+      d.toLocaleDateString(undefined,{weekday:"short"}),el("b",null,String(d.getDate())),el("span",{class:"count"+(n?" on":"")},String(n))),isTicket,src=>dropOnDay(src,k)));
   }
   // the day
   const stops=dayStops(),todo=stops.filter(t=>t.stage==="scheduled"),s=S(),shop=hasGeo({lat:s.shopLat,lng:s.shopLng})?{lat:s.shopLat,lng:s.shopLng}:null;
   const title=(jv.day===tday?"Today · ":jv.day===shiftDay(tday,1)?"Tomorrow · ":"")+parseDue(jv.day).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
-  const url=mapsUrl(todo);
+  const urls=mapsUrls(todo);
   const head=el("div",{class:"panel-head"},el("h2",null,title),
     todo.length>1?el("button",{type:"button",class:"btn",onclick:buildRoute},"Best route"):null,
-    url?el("a",{class:"btn primary",href:url,target:"_blank",rel:"noopener"},"Open in Google Maps"):null);
+    ...urls.map((x,i)=>el("a",{class:"btn primary",href:x.u,target:"_blank",rel:"noopener"},urls.length>1?"Maps: stops "+x.from+"–"+x.to:"Open in Google Maps")));
   const list=el("div",{class:"rowlist flush"});
-  let prev=shop,total=0,known=true;
+  let prev=shop,estMi=0,realMi=0,realMin=0,known=true;
   if(!stops.length)list.append(el("div",{class:"empty"},loadedOnce?"Nothing scheduled"+(jv.crew?" for "+jv.crew:"")+" this day. Add a ticket from the list "+(window.innerWidth>900?"on the right.":"below."):"Loading…"));
   stops.forEach((t,i)=>{
-    const c=cust(t.customerId),done=t.stage!=="scheduled";
-    if(done){}else if(hasGeo(t)&&prev){const m=miles(prev,t)*1.3;total+=m;if(i||shop)list.append(el("div",{class:"leg"},"about "+(m<10?m.toFixed(1):Math.round(m))+" mi"+(i?"":" from the shop")))}
+    const c=cust(t.customerId),done=t.stage!=="scheduled",leg=t.leg&&t.leg.d===t.date?t.leg:null;
+    if(done){}
+    else if(leg){realMi+=leg.mi;realMin+=leg.min;list.append(el("div",{class:"leg"},leg.min+" min · "+leg.mi+" mi"+(i?"":" from the shop")))}
+    else if(hasGeo(t)&&prev){const m=miles(prev,t)*1.3;estMi+=m;if(i||shop)list.append(el("div",{class:"leg"},"about "+(m<10?m.toFixed(1):Math.round(m))+" mi"+(i?"":" from the shop")))}
     else if(i)known=false;
     if(!done){if(hasGeo(t))prev=t;else{prev=null;if(t.address)known=false}}
     const main=el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,t.address||"No address yet"),
@@ -1194,29 +1324,62 @@ function renderSchedule(){
     const side=el("div",{class:"side"},reminderBit(t),
       done?null:el("button",{type:"button",class:"btn sm",onclick:()=>goStage(t,t.kind==="estimate"?"visited":"completed")},t.kind==="estimate"?"Visited":"Completed"),
       !done&&todo.length>1?el("span",{class:"arrows"},el("button",{type:"button","aria-label":"Move up",disabled:i===0,onclick:()=>moveStop(i,-1)},"▲"),el("button",{type:"button","aria-label":"Move down",disabled:i===todo.length-1,onclick:()=>moveStop(i,1)},"▼")):null);
-    list.append(el("div",{class:"row"+(done?" done":"")},el("span",{class:"stop-n"},done?"✓":String(i+1)),main,side));
+    const row=el("div",{class:"row"+(done?" done":"")},el("span",{class:"stop-n"},done?"✓":String(i+1)),main,side);
+    list.append(done?row:draggable(row,"ticket",t.id));
   });
   const bits=[todo.length+" stop"+(todo.length===1?"":"s")+" to go"+(stops.length>todo.length?" · "+(stops.length-todo.length)+" done":"")];
-  if(total>0)bits.push("about "+Math.round(total)+" mi of driving"+(known?"":" (some addresses aren't on the map yet)"));
+  if(realMin>0)bits.push(Math.floor(realMin/60)?Math.floor(realMin/60)+" hr "+(realMin%60)+" min of driving":realMin+" min of driving",Math.round(realMi+estMi)+" mi");
+  else if(estMi>0)bits.push("about "+Math.round(estMi)+" mi of driving (rough estimate"+(known?"":"; some addresses aren't on the map yet")+")");
+  if(todo.some(t=>t.time)&&todo.length>1)bits.push("stops with a set time stay in time order");
   const texts=!smsReady?"Automatic texts aren't set up yet – use Text reminder to send from your own phone.":!s.autoSms?"Automatic reminder texts are turned off in Settings.":"Customers are texted automatically the evening before.";
   $("#schedDay").replaceChildren(head,el("p",{class:"panel-note"},bits.join(" · ")+(s.shopAddress?"":" · Add your shop address in Settings so routes start from there.")),list,el("p",{class:"panel-note",style:"margin:12px 0 0"},texts));
-  // waiting list
-  const un=tickets.filter(t=>t.stage==="ticket").sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-  const ul=el("div",{class:"rowlist flush"});
-  if(!un.length)ul.append(el("div",{class:"empty"},"Every ticket is on the schedule."));
-  for(const t of un){
-    const c=cust(t.customerId);
-    ul.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,t.address||(t.description||"").slice(0,80)||"No address yet"),
-      daysSince(t.stageAt)>=1?el("small",null,"Waiting "+daysSince(t.stageAt)+" day"+(daysSince(t.stageAt)===1?"":"s")):null),
-      el("div",{class:"side"},el("button",{type:"button",class:"btn sm",onclick:()=>openSchedule(t,jv.day)},"Add to "+parseDue(jv.day).toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"})))));
+  $("#schedUn").replaceChildren(...waitingPanel());
+}
+function renderWeekGrid(){
+  const start=weekStart(jv.day),tday=ymd(new Date()),days=[];
+  for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(d)}
+  const keys=days.map(ymd),inWeek=tickets.filter(t=>t.date>=keys[0]&&t.date<=keys[6]&&t.stage!=="lost");
+  $("#calTitle").textContent=days[0].toLocaleDateString(undefined,{month:"short",day:"numeric"})+" – "+days[6].toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+inWeek.filter(t=>!jv.crew||t.assignee===jv.crew).length+" stops";
+  const names=PEOPLE.filter(p=>jv.crew?p.name===jv.crew:(p.role==="Foreman"||inWeek.some(t=>t.assignee===p.name))).map(p=>p.name);
+  if(!jv.crew)names.push("");
+  const g=el("div",{class:"wk"},el("div",{class:"wk-h"}));
+  days.forEach((d,i)=>g.append(el("div",{class:"wk-h"+(keys[i]===tday?" today":"")},el("button",{type:"button",title:"Open this day",onclick:()=>{jv.day=keys[i];jv.cal="day";renderJobs()}},d.toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"})))));
+  for(const n of names){
+    g.append(el("div",{class:"wk-who"},n?av(n):null,n||"Not assigned"));
+    for(const k of keys){
+      const cell=el("div",{class:"wk-cell"});
+      for(const t of inWeek.filter(t=>t.date===k&&(t.assignee||"")===n).sort(byWhen))cell.append(calChip(t));
+      g.append(dropZone(cell,isTicket,src=>dropOnDay(src,k,n)));
+    }
   }
-  $("#schedUn").replaceChildren(el("div",{class:"panel-head"},el("h2",null,"Needs scheduling"),el("span",{class:"n",style:"color:var(--muted);font-weight:600"},String(un.length))),ul);
+  $("#calGrid").replaceChildren(g);
+  $("#calBelow").replaceChildren(el("div",{class:"panel"},...waitingPanel()));
+}
+function renderMonthGrid(){
+  const cur=parseDue(jv.day),first=new Date(cur.getFullYear(),cur.getMonth(),1),start=new Date(first),tday=ymd(new Date());
+  start.setDate(1-first.getDay());
+  const last=new Date(cur.getFullYear(),cur.getMonth()+1,0),weeks=Math.ceil((first.getDay()+last.getDate())/7);
+  const g=el("div",{class:"mo"},...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>el("div",{class:"mo-h"},d)));
+  let total=0;
+  for(let i=0;i<weeks*7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=ymd(d),inMonth=d.getMonth()===cur.getMonth(),items=onDay(k).sort(byWhen);
+    if(inMonth)total+=items.length;
+    const open=()=>{jv.day=k;jv.cal="day";renderJobs()};
+    const cell=el("div",{class:(inMonth?"":"out ")+(k===tday?"today":"")},el("button",{type:"button",class:"dn","aria-label":d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+", "+items.length+" stops",onclick:open},String(d.getDate())));
+    for(const t of items.slice(0,3))cell.append(calChip(t,true));
+    if(items.length>3)cell.append(el("button",{type:"button",class:"more",onclick:open},"+"+(items.length-3)+" more"));
+    g.append(dropZone(cell,isTicket,src=>dropOnDay(src,k)));
+  }
+  $("#calTitle").textContent=cur.toLocaleDateString(undefined,{month:"long",year:"numeric"})+" · "+total+" stops";
+  $("#calGrid").replaceChildren(g);
+  $("#calBelow").replaceChildren(el("div",{class:"panel"},...waitingPanel()));
 }
 async function buildRoute(){
   toast("Working out the best route…");
   try{
     const r=await op({op:"route",date:jv.day,assignee:jv.crew});
-    toast(r.missing?"Route set. "+r.missing+" address"+(r.missing>1?"es":"")+" couldn't be found on the map – check the spelling.":"Route set – "+r.count+" stops in the shortest driving order.");
+    const how=r.drive==="google"?(r.timed?"Route set with real drive times – stops with a set time kept in time order.":"Route set – "+r.count+" stops in the fastest driving order, with real drive times."):(r.timed?"Route set – stops with a set time kept in time order.":"Route set – "+r.count+" stops in the shortest driving order.");
+    toast(r.missing?"Route set. "+r.missing+" address"+(r.missing>1?"es":"")+" couldn't be found on the map – check the spelling.":how);
   }catch(e){}
 }
 function moveStop(i,dir){
@@ -1298,18 +1461,6 @@ function goStage(t,stage){
   }
   send().then(()=>{if(S().autoTasks&&stage==="completed")toast("Completed – a Send invoice task was added for "+S().officeAssignee);else if(S().autoTasks&&stage==="visited")toast("Visited – a Send estimate task was added for "+S().officeAssignee)}).catch(()=>{});
 }
-async function openReminder(t){
-  let d;try{d=await api("/api/remind",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:t.id,preview:true})})}catch(e){return}
-  const c=cust(t.customerId),text=area("mText",d.text);text.style.minHeight="130px";
-  const err=el("div",{class:"err",role:"alert"});
-  const viaPhone=async()=>{location.href=smsHref(c.phone)+"?&body="+encodeURIComponent(text.value.trim());await op({op:"reminded",id:t.id});closeMini()};
-  openMini("Text reminder – "+c.name,
-    [el("p",{style:"margin:0 0 12px;color:var(--ink-2)"},"To "+(c.phone||"(no phone)")+(t.date?" · scheduled "+whenLabel(t):"")),fld("Message",text),
-     d.configured?null:el("p",{class:"panel-note"},"Automatic texting isn't connected yet, so this opens your phone's Messages app with the text filled in."),err],
-    [btn("Cancel","",closeMini),
-     d.configured?btn("Use my phone instead","",viaPhone):null,
-     d.configured?btn("Send text","primary",async()=>{try{const r=await api("/api/remind",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:t.id,text:text.value.trim()})});applyBoard(r.board);closeMini();toast("Reminder texted to "+c.name)}catch(e){err.textContent=e.message||"Couldn't send."}}):btn("Open in Messages","primary",viaPhone)]);
-}
 function openCustomerForm(c){
   const n=inp("mcName","text",c&&c.name),p=inp("mcPhone","tel",c&&c.phone),e=inp("mcEmail","email",c&&c.email),a=inp("mcAddr","text",c&&c.address,{placeholder:"Street, town, state, ZIP"}),no=area("mcNotes",c&&c.notes,"Gate codes, dogs, preferences, who to ask for…");
   const ok=chk("mcSms","OK to text this customer",!c||c.smsOk!==false),err=el("div",{class:"err",role:"alert"});
@@ -1326,16 +1477,25 @@ function openSettings(){
   const sms=chk("msSms","Text customers automatically the evening before a scheduled visit",s.autoSms);
   const days=el("div",{class:"toggle-row"},...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d,i)=>{const c=el("input",{type:"checkbox",name:"msSkip",value:String(i)});c.checked=s.skipDays.includes(i);return el("label",{class:"toggle"},c,el("span",null,d))}));
   const tpl=area("msTpl",s.smsTemplate);tpl.style.minHeight="120px";
+  const omw=area("msOmw",s.omwTemplate),thx=area("msThx",s.thanksTemplate),rev=inp("msRev","url",s.reviewLink,{placeholder:"https://g.page/r/…/review"});
+  const autoThx=chk("msAutoThx","Send the thank-you automatically when a job is marked paid (needs texting connected)",s.autoThanks);
+  const bk=el("div",null,el("p",{class:"panel-note"},"Loading backups…"));
   openMini("Settings",[
     addrField("Shop address",shop,"(where routes start)"),fld("Company phone",ph,"(shown in reminder texts)"),
     auto,fld("Automatic office tasks go to",who),
     el("p",{class:"group-title",style:"margin-top:8px"},"Reminder texts"),
     el("p",{class:"panel-note"},smsReady?"Texting is connected.":"Texting isn't connected yet (needs a Twilio account – see the README). Until then, Text reminder opens your own phone's Messages app."),
     sms,el("div",{class:"field"},el("span",{class:"lab"},"Never send automatic texts on these evenings"),days),
-    fld("Message",tpl,"– you can use {first} {when} {time} {service} {address} {company_phone}")],
+    fld("Reminder message",tpl,"– you can use {first} {when} {time} {service} {address} {company_phone}"),
+    fld("“On my way” message",omw),
+    fld("Thank-you message",thx,"– {review} adds a line with your review link"),
+    fld("Google review link",rev,"(optional)"),autoThx,
+    el("p",{class:"group-title",style:"margin-top:8px"},"Backups"),bk],
     [btn("Cancel","",closeMini),btn("Save settings","primary",async()=>{
       await op({op:"settings",data:{shopAddress:shop.value,companyPhone:ph.value,officeAssignee:who.value,autoTasks:auto.querySelector("input").checked,autoSms:sms.querySelector("input").checked,
-        skipDays:[...document.querySelectorAll('input[name="msSkip"]:checked')].map(i=>+i.value),smsTemplate:tpl.value}});closeMini();toast("Settings saved")})]);
+        skipDays:[...document.querySelectorAll('input[name="msSkip"]:checked')].map(i=>+i.value),smsTemplate:tpl.value,
+        omwTemplate:omw.value,thanksTemplate:thx.value,reviewLink:rev.value.trim(),autoThanks:autoThx.querySelector("input").checked}});closeMini();toast("Settings saved")})]);
+  loadBackups(bk);
 }
 
 // ---------- ticket + customer drawers ----------
@@ -1383,6 +1543,7 @@ function renderTicketDetail(){
   row("Who's going",t.assignee?el("span",{style:"display:inline-flex;align-items:center;gap:8px"},av(t.assignee),t.assignee):"");
   row("Amount",t.amount);
   if(t.stage==="scheduled")row("Reminder",reminderBit(t));
+  row("Texts",textBits(t));
   if(t.stage==="followup"&&t.followUp)row("Follow up on",fmtDay(t.followUp));
   if(t.stage==="lost")row("Why lost",t.lostReason||"No reason given");
   const from=tickets.find(x=>x.id===t.fromEstimateId),job=tickets.find(x=>x.id===t.jobId);
@@ -1516,18 +1677,215 @@ $("#tSave").onclick=async()=>{
   $("#tSave").disabled=true;
   try{
     if(tEditing){await op({op:"ticketUpdate",id:tEditing,data});closeTicketForm();toast("Changes saved")}
-    else{const r=await op({op:"ticketCreate",data});closeTicketForm();toast("Ticket T-"+r.number+" created"+(data.date?" and scheduled":" – it's waiting to be scheduled"));if(jv.main!=="jobs")setMain("jobs");if(r.id)openTicket(r.id)}
+    else{const r=await op({op:"ticketCreate",data});closeTicketForm();toast("Ticket T-"+r.number+" created"+(data.date?" and scheduled":" – it's waiting to be scheduled"));if(jv.main==="tasks")setMain("jobs");if(r.id)openTicket(r.id)}
   }catch(e){if(e.message&&e.shown)$("#tErr").textContent=e.message}
   $("#tSave").disabled=false;
 };
 attachSuggest($("#iCustomer"),$("#iSuggest"),c=>{$("#iCustomer").value=c.name||"";if(!$("#iPhone").value)$("#iPhone").value=c.phone||"";if(!$("#iEmail").value)$("#iEmail").value=c.email||"";if(!$("#iAddress").value)$("#iAddress").value=c.address||""});
 
+// =====================================================================
+// Today (home screen + "my stops"), drag and drop, alerts, backups
+// =====================================================================
+let dragSrc=null;
+function draggable(node,type,id){
+  node.setAttribute("draggable","true");
+  node.addEventListener("dragstart",e=>{dragSrc={type,id};try{e.dataTransfer.setData("text/plain",id);e.dataTransfer.effectAllowed="move"}catch(x){}node.classList.add("dragging")});
+  node.addEventListener("dragend",()=>{dragSrc=null;node.classList.remove("dragging");document.querySelectorAll(".drop-on").forEach(n=>n.classList.remove("drop-on"))});
+  return node;
+}
+function dropZone(node,accepts,onDrop){
+  node.addEventListener("dragover",e=>{if(dragSrc&&accepts(dragSrc)){e.preventDefault();node.classList.add("drop-on")}});
+  node.addEventListener("dragleave",e=>{if(!node.contains(e.relatedTarget))node.classList.remove("drop-on")});
+  node.addEventListener("drop",e=>{e.preventDefault();node.classList.remove("drop-on");const s=dragSrc;dragSrc=null;if(s&&accepts(s))onDrop(s)});
+  return node;
+}
+// A card that opens on click/Enter and can be dragged (a real <button> can't be dragged in every browser).
+function cardNode(cls,open,type,id,...kids){
+  return draggable(el("div",{class:cls,role:"button",tabindex:"0",onclick:open,onkeydown:e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}}},...kids),type,id);
+}
+
+// ---------- Today ----------
+let myDay="";
+// Every ticket that is stuck somewhere, with the reason, most urgent first.
+function attention(){
+  const out=[];
+  for(const t of tickets){
+    let why="",rank=9;
+    if(isStale(t)){why="Scheduled date passed – mark it done or reschedule";rank=1}
+    else if(t.stage==="followup"&&t.followUp&&parseDue(t.followUp)<=today()){why="Follow up on this estimate today";rank=2}
+    else if(t.stage==="sent"&&daysSince(t.stageAt)>=7){why="Estimate sent "+daysSince(t.stageAt)+" days ago – no answer";rank=3}
+    else if(t.stage==="billed"&&daysSince(t.stageAt)>=30){why="Billed "+daysSince(t.stageAt)+" days ago – not paid";rank=4}
+    else if(t.stage==="completed"&&daysSince(t.stageAt)>=3){why="Completed "+daysSince(t.stageAt)+" days ago – not billed yet";rank=5}
+    else if(t.stage==="ticket"&&daysSince(t.stageAt)>=3){why="Waiting "+daysSince(t.stageAt)+" days to be scheduled";rank=6}
+    if(why)out.push({t,why,rank});
+  }
+  return out.sort((a,b)=>a.rank-b.rank||(a.t.stageAt||0)-(b.t.stageAt||0));
+}
+function myStopCard(t,n){
+  const c=cust(t.customerId),done=t.stage!=="scheduled",sentOmw=t.texts&&t.texts.omw;
+  const fi=el("input",{type:"file",accept:"image/*",multiple:true,"aria-label":"Add photos"});fi.onchange=()=>{addPhotos(t.id,[...fi.files]);fi.value=""};
+  const acts=el("div",{class:"acts"},
+    t.address?el("a",{class:"btn primary",href:navUrl(t.address),target:"_blank",rel:"noopener"},"Navigate"):null,
+    c.phone?el("a",{class:"btn",href:"tel:"+c.phone.replace(/[^\d+]/g,"")},"Call"):null,
+    !done&&c.phone&&c.smsOk!==false?el("button",{type:"button",class:"btn",onclick:()=>openText(t,"omw")},sentOmw?"On my way ✓":"On my way"):null,
+    el("label",{class:"btn"},"Photos",fi),
+    done?null:el("button",{type:"button",class:"btn",onclick:()=>goStage(t,t.kind==="estimate"?"visited":"completed")},t.kind==="estimate"?"Visited":"Done"),
+    el("button",{type:"button",class:"btn",onclick:()=>openTicket(t.id)},"Details"));
+  const nPh=photos.filter(p=>p.taskId===t.id).length;
+  return el("div",{class:"mystop"+(done?" done":"")},
+    el("div",{class:"mystop-top"},el("span",{class:"stop-n"},done?"✓":String(n)),el("div",null,ticketChips(t),el("h3",null,c.name)),el("span",{class:"when"},done?stageOf(t).label:t.time?fmtTime(t.time):"Any time")),
+    t.address?el("p",null,t.address):null,
+    t.description?el("p",{style:"white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"},t.description):null,
+    c.notes?el("p",null,el("b",null,"Note: "),c.notes):null,
+    nPh?el("p",{style:"color:var(--muted);font-size:13px"},nPh+" photo"+(nPh>1?"s":"")+" on this ticket"):null,acts);
+}
+function renderToday(){
+  if(jv.main!=="today")return;
+  const td=ymd(new Date()),day=myDay===shiftDay(td,1)?myDay:td,isToday=day===td,p=person(me);
+  const sortStops=(a,b)=>((a.stage!=="scheduled")-(b.stage!=="scheduled"))||((a.ord==null?999:a.ord)-(b.ord==null?999:b.ord))||byWhen(a,b);
+  const all=tickets.filter(t=>t.date===day&&t.stage!=="lost").sort(sortStops),mine=all.filter(t=>t.assignee===me);
+  const att=attention(),myTasks=tasks.filter(t=>t.assignee===me&&t.status!=="done").sort(sortTasks),late=myTasks.filter(t=>dueClass(t)==="late").length;
+  const waiting=tickets.filter(t=>t.stage==="ticket").length;
+  const fu=tickets.filter(t=>(t.stage==="followup"&&t.followUp&&parseDue(t.followUp)<=today())||(t.stage==="sent"&&daysSince(t.stageAt)>=7)).length;
+  const unpaid=tickets.filter(t=>t.stage==="billed"),unpaidAmt=unpaid.reduce((n,t)=>n+money(t.amount),0);
+  const go=(main,fn)=>()=>{if(fn)fn();setMain(main);window.scrollTo(0,0)};
+  const tile=(n,label,sub,hot,fn)=>el("button",{type:"button",class:"tile"+(hot?" hot":""),onclick:fn},el("b",null,String(n)),el("span",null,label),el("small",null,sub||" "));
+  const hour=new Date().getHours();
+  const head=el("div",{class:"today-head"},
+    el("h2",null,(hour<12?"Good morning":hour<17?"Good afternoon":"Good evening")+(me?", "+me.replace(/^(Mr|Mrs|Ms)\.\s*/,""):""),el("small",null,new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))),
+    el("div",{class:"seg",role:"group","aria-label":"Day"},
+      el("button",{type:"button","aria-pressed":String(isToday),onclick:()=>{myDay=td;renderToday()}},"Today"),
+      el("button",{type:"button","aria-pressed":String(!isToday),onclick:()=>{myDay=shiftDay(td,1);renderToday()}},"Tomorrow")));
+  const tiles=el("div",{class:"tiles"},
+    tile(all.filter(t=>t.stage==="scheduled").length,(isToday?"Stops today":"Stops tomorrow"),all.length?all.length-all.filter(t=>t.stage==="scheduled").length+" done":"Nothing scheduled",false,go("jobs",()=>{jv.sub="schedule";jv.cal="day";jv.day=day})),
+    tile(waiting,"Need scheduling",waiting?"Tickets waiting for a date":"All on the schedule",waiting>0,go("jobs",()=>{jv.sub="schedule"})),
+    tile(fu,"Follow-ups due",fu?"Estimates to chase":"Nothing to chase",fu>0,go("jobs",()=>{jv.sub="tickets";jv.pipe="est";jv.tab="followup"})),
+    tile(unpaid.length,"Waiting on payment",unpaidAmt?"$"+Math.round(unpaidAmt).toLocaleString()+" billed":"Nothing outstanding",unpaid.some(t=>daysSince(t.stageAt)>=30),go("jobs",()=>{jv.sub="tickets";jv.pipe="jobs";jv.tab="billed"})),
+    tile(myTasks.length,"My open tasks",late?late+" overdue":"None overdue",late>0,go("tasks",()=>{view.mine=true;$("#mineBtn").setAttribute("aria-pressed","true")})));
+  // left column: my stops, then the whole day
+  const left=el("div",{class:"today-col"});
+  if(mine.length||p.role==="Foreman"){
+    const box=el("div",{class:"today-col",style:"gap:10px"});
+    const todo=mine.filter(t=>t.stage==="scheduled"),urls=mapsUrls(todo);
+    box.append(el("div",{class:"panel-head",style:"margin:0"},el("h2",null,(isToday?"My stops today":"My stops tomorrow")+" · "+todo.length+" to go"),
+      ...(todo.length>1?urls.map(x=>el("a",{class:"btn",href:x.u,target:"_blank",rel:"noopener"},urls.length>1?"Route "+x.from+"–"+x.to:"Whole route in Maps")):[])));
+    if(!mine.length)box.append(el("div",{class:"panel"},el("div",{class:"empty"},loadedOnce?"Nothing on your schedule "+(isToday?"today.":"tomorrow."):"Loading…")));
+    let n=0;for(const t of mine)box.append(myStopCard(t,t.stage==="scheduled"?++n:0));
+    left.append(box);
+  }
+  const others=all.filter(t=>t.assignee!==me);
+  if(others.length||!mine.length&&p.role!=="Foreman"){
+    const list=el("div",{class:"rowlist flush"});
+    if(!others.length)list.append(el("div",{class:"empty"},loadedOnce?"Nothing scheduled "+(isToday?"today":"tomorrow")+" yet.":"Loading…"));
+    for(const t of others){const c=cust(t.customerId),done=t.stage!=="scheduled";
+      list.append(el("div",{class:"row"+(done?" done":"")},el("button",{type:"button",class:"grow",onclick:()=>openTicket(t.id)},ticketChips(t),el("b",null,c.name),el("small",null,[t.time?fmtTime(t.time):"Any time",t.assignee||"Not assigned",t.address].filter(Boolean).join(" · "))),
+        el("div",{class:"side"},done?el("span",{class:"chip good"},stageOf(t).label):reminderBit(t))))}
+    left.append(el("div",{class:"panel"},el("div",{class:"panel-head"},el("h2",null,mine.length?"Everyone else":isToday?"On the schedule today":"On the schedule tomorrow"),el("button",{type:"button",class:"btn sm",onclick:go("jobs",()=>{jv.sub="schedule";jv.cal="day";jv.day=day})},"Open schedule")),list));
+  }
+  // right column: what needs attention, my tasks
+  const right=el("div",{class:"today-col"});
+  const al=el("div",{class:"rowlist flush"});
+  if(!att.length)al.append(el("div",{class:"empty"},loadedOnce?"Nothing is stuck. Nice.":"Loading…"));
+  for(const a of att.slice(0,8)){const c=cust(a.t.customerId);
+    al.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openTicket(a.t.id)},ticketChips(a.t),el("b",null,c.name+(a.t.amount?" · "+a.t.amount:"")),el("small",{class:"reason"},a.why))))}
+  if(att.length>8)al.append(el("div",{class:"empty",style:"padding:6px"},"+"+(att.length-8)+" more on the Jobs & Estimates boards"));
+  right.append(el("div",{class:"panel"},el("div",{class:"panel-head"},el("h2",null,"Needs attention"),el("span",{class:"n",style:"color:var(--muted);font-weight:600"},String(att.length))),al));
+  const tl=el("div",{class:"rowlist flush"});
+  if(!myTasks.length)tl.append(el("div",{class:"empty"},loadedOnce?"No open tasks for you.":"Loading…"));
+  for(const t of myTasks.slice(0,6))tl.append(el("div",{class:"row"},el("button",{type:"button",class:"grow",onclick:()=>openDetail(t.id)},el("b",null,typeLabel(t.type)+(t.customer?" – "+t.customer:"")),
+    el("small",null,(t.description||t.address||"").slice(0,90))),el("div",{class:"side"},t.due?el("span",{class:"due "+dueClass(t)},fmtDue(t.due)):null)));
+  right.append(el("div",{class:"panel"},el("div",{class:"panel-head"},el("h2",null,"My tasks"),myTasks.length>6?el("button",{type:"button",class:"btn sm",onclick:go("tasks",()=>{view.mine=true;$("#mineBtn").setAttribute("aria-pressed","true")})},"See all "+myTasks.length):null),tl));
+  const banner=pushHint?el("div",{class:"banner"},el("span",null,"Get an alert on this device when a task or job is assigned to you."),
+    el("button",{type:"button",class:"btn sm",onclick:async()=>{if(await enablePush()){pushHint=false;renderToday()}}},"Turn on alerts"),
+    el("button",{type:"button",class:"btn sm ghost",onclick:()=>{pushHint=false;ls.set("rs_nopush","1");renderToday()}},"Not now")):null;
+  $("#viewToday").replaceChildren(el("div",{class:"today-wrap"},banner,head,tiles,el("div",{class:"today-grid"},left.childNodes.length?left:right,left.childNodes.length?right:null)));
+}
+
+// ---------- alerts on this device ----------
+let pushHint=false;
+const pushOK=()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+const b64u=s=>{const pad="=".repeat((4-s.length%4)%4),raw=atob((s+pad).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(raw,c=>c.charCodeAt(0))};
+const jsonPost=(method,body)=>({method,headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+async function pushState(){
+  if(!pushOK())return"unsupported";
+  if(Notification.permission==="denied")return"blocked";
+  try{const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),1500))]);if(!reg)return"off";return(await reg.pushManager.getSubscription())&&Notification.permission==="granted"?"on":"off"}catch(e){return"off"}
+}
+async function enablePush(){
+  try{
+    const k=await api("/api/push");
+    if(!k.configured){toast("Alerts aren't switched on for the board yet.");return false}
+    if(await Notification.requestPermission()!=="granted"){toast("Alerts are blocked for this site in your browser settings.");return false}
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k.key)});
+    await api("/api/push",jsonPost("POST",{sub:sub.toJSON()}));
+    toast("Alerts are on for this device");return true;
+  }catch(e){if(!e.shown)toast("Couldn't turn alerts on. Try again.");return false}
+}
+async function disablePush(){
+  try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(!sub)return;
+    await fetch("/api/push",Object.assign({credentials:"same-origin"},jsonPost("DELETE",{endpoint:sub.endpoint}))).catch(()=>{});await sub.unsubscribe()}catch(e){}
+}
+async function renderPushBox(){
+  const box=$("#pushBox");box.replaceChildren(el("p",{class:"panel-note"},"Checking alerts…"));
+  const st=await pushState();
+  const line=(text,b)=>box.replaceChildren(el("div",{class:"who-card",style:"margin-top:12px;flex-wrap:wrap"},el("span",{style:"flex:1 1 200px"},el("b",null,"Alerts on this device"),el("small",null,text)),b||null));
+  if(st==="unsupported")line(/iPhone|iPad/.test(navigator.userAgent)?"On iPhone, add the board to your Home Screen first (Share → Add to Home Screen), then open it from there.":"This browser can't show alerts.");
+  else if(st==="blocked")line("Blocked in this browser's settings for this site. Allow notifications there, then come back.");
+  else if(st==="on")line("On. You'll be told when a task or job is assigned to you.",btn("Turn off","",async()=>{await disablePush();renderPushBox()}));
+  else line("Off. Turn on to hear when a task or job is assigned to you.",btn("Turn on","primary",async()=>{await enablePush();renderPushBox()}));
+}
+
+// ---------- customer texts (reminder, on my way, thank you) ----------
+const TEXT_TITLE={reminder:"Text reminder",omw:"“On my way” text",thanks:"Thank-you text"};
+async function openText(t,kind){
+  let d;try{d=await api("/api/remind",jsonPost("POST",{id:t.id,kind,preview:true}))}catch(e){return}
+  const c=cust(t.customerId),text=area("mText",d.text);text.style.minHeight="130px";
+  const err=el("div",{class:"err",role:"alert"});
+  const viaPhone=async()=>{location.href=smsHref(c.phone)+"?&body="+encodeURIComponent(text.value.trim());await op({op:"reminded",id:t.id,kind});closeMini()};
+  openMini(TEXT_TITLE[kind]+" – "+c.name,
+    [el("p",{style:"margin:0 0 12px;color:var(--ink-2)"},"To "+(c.phone||"(no phone)")+(kind==="reminder"&&t.date?" · scheduled "+whenLabel(t):"")),fld("Message",text),
+     kind==="thanks"&&!S().reviewLink?el("p",{class:"panel-note"},"Tip: add your Google review link in Settings and it's included automatically."):null,
+     d.configured?null:el("p",{class:"panel-note"},"Automatic texting isn't connected yet, so this opens your phone's Messages app with the text filled in."),err],
+    [btn("Cancel","",closeMini),
+     d.configured?btn("Use my phone instead","",viaPhone):null,
+     d.configured?btn("Send text","primary",async()=>{try{const r=await api("/api/remind",jsonPost("POST",{id:t.id,kind,text:text.value.trim()}));applyBoard(r.board);closeMini();toast("Text sent to "+c.name)}catch(e){err.textContent=e.message||"Couldn't send."}}):btn("Open in Messages","primary",viaPhone)]);
+}
+function textBits(t){
+  const c=cust(t.customerId);if(!c.phone||c.smsOk===false)return null;
+  const x=t.texts||{},out=el("span",{style:"display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center"});
+  if(t.stage==="scheduled")out.append(el("button",{type:"button",class:"btn sm",onclick:()=>openText(t,"omw")},x.omw?"On my way ✓ – send again":"On my way"));
+  if(["completed","billed","paid"].includes(t.stage))out.append(el("button",{type:"button",class:"btn sm",onclick:()=>openText(t,"thanks")},x.thanks?"Thank-you ✓ – send again":"Send thank-you"));
+  return out.childNodes.length?out:null;
+}
+
+// ---------- backups ----------
+const backupLabel=b=>{const m=/board-(\d{4}-\d{2}-\d{2})/.exec(b.name);return m?parseDue(m[1]).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Before a restore · "+fmtStamp(b.at)};
+async function loadBackups(box){
+  let d;try{d=await api("/api/backup")}catch(e){box.replaceChildren(el("p",{class:"panel-note"},"Couldn't load backups."));return}
+  const daily=d.backups.filter(b=>/board-\d{4}/.test(b.name));
+  box.replaceChildren(
+    el("p",{class:"panel-note"},daily.length?"A copy of the whole board is saved every evening and kept for 30 days. Latest: "+backupLabel(daily[0])+". Photos are not included.":"A copy of the whole board is saved every evening and kept for 30 days. None saved yet."),
+    el("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"},
+      btn("Back up now","",async()=>{await api("/api/backup",jsonPost("POST",{action:"now"}));toast("Backup saved");loadBackups(box)}),
+      d.canRestore&&d.backups.length?btn("Restore a backup…","",()=>openRestore(d.backups)):null));
+}
+function openRestore(list){
+  const pick=sel("mBk",list.map(b=>[b.name,backupLabel(b)]),list[0].name);
+  openMini("Restore a backup",[el("p",{style:"margin:0 0 14px;color:var(--ink-2)"},"This puts every task, ticket and customer back to how it was in that copy. Anything added since then disappears from the board (the board as it is now is saved first, so this can be undone)."),fld("Go back to",pick)],
+    [btn("Cancel","",closeMini),btn("Restore","primary",async()=>{if(!confirm("Replace the whole board with this backup?"))return;const r=await api("/api/backup",jsonPost("POST",{action:"restore",name:pick.value}));applyBoard(r.board);closeMini();toast("Board restored")})]);
+}
+
 // ---------- boot ----------
+async function initPushHint(){
+  if(!pushOK()||Notification.permission!=="default"||ls.get("rs_nopush"))return;
+  try{const k=await api("/api/push");if(k.configured){pushHint=true;renderToday()}}catch(e){}
+}
 renderMe();setMain(jv.main);
 (async()=>{
   try{
     const r=await fetch("/api/auth",{credentials:"same-origin",cache:"no-store"});const d=await r.json();
-    if(d.ok){authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();await refresh()}else showLogin();
+    if(d.ok){authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();await refresh();initPushHint()}else showLogin();
   }catch(e){notice("You're offline. Connect to the internet to load the board.")}
 })();
 })();

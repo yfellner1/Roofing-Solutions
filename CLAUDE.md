@@ -23,6 +23,9 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 - `api/_sms.js`  — Twilio REST call + reminder message builder.
 - `api/places.js` — address suggestions while typing (GET `?q=`). Google Places if `GOOGLE_MAPS_KEY` is set, else free Photon (OpenStreetMap). A picked suggestion sends its lat/lng with the ticket (`data.geo`) so no second lookup is needed.
 - `api/remind.js` — GET = nightly cron (see `vercel.json`, needs `CRON_SECRET`), POST = preview/send one reminder.
+- `api/nightly.js` — the one nightly cron (`vercel.json`, needs `CRON_SECRET`): saves a dated backup, then runs the reminder texts.
+- `api/backup.js` — list backups, "back up now", restore (restore is limited to `ADMINS` in `_lib.js`; the current board is saved as `backups/before-restore-*.json` first). Backups live in the same Blob store under `backups/board-YYYY-MM-DD.json`, 30 days kept. Photos are not backed up.
+- `api/_push.js` / `api/push.js` — Web Push alerts (needs `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`). Device subscriptions are stored in `db/push.json`, apart from the board. `op.js` collects alerts during a save (`setNotify`) and sends them after it succeeds. `sw.js` shows them.
 - `test/dev.mjs` — `npm run preview`: whole app on localhost with in-memory storage (safe; never touches live data).
 
 ## Jobs & Estimates
@@ -36,6 +39,10 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
   completed → Send invoice, billed → Follow up on payment) for `settings.officeAssignee`; finishing the Send estimate / Send invoice task moves the ticket on.
   Controlled by `settings.autoTasks`.
 - Routing: tickets are geocoded when saved (network work happens in `prepare()` in `op.js`, before `mutate`). "Best route" stores `ord` on that day's scheduled tickets; the browser builds the Google Maps link.
+- Front end has three top tabs: **Today** (home: tiles, "my stops" with big buttons for foremen, needs-attention list, my tasks), Tasks, Jobs & Estimates. Schedule has Day / Week (by crew) / Month views.
+- Drag and drop (desktop only, HTML5): cards between columns change status/stage (`goStage` still shows its dialogs); tickets dropped on a day (week strip, week grid cell, month cell) are scheduled via `dropOnDay`. Cards are `div role=button` (`cardNode`) because `<button>` can't be dragged in every browser.
+- Route order: with no fixed times, `bestRoute` (or Google's optimised order); if any stop has a time, `planOrder` keeps timed stops in clock order and slots the rest in. With `GOOGLE_MAPS_KEY` + Routes API enabled, `driveRoute` stores real `leg: {mi, min, d}` per ticket; otherwise the UI shows a straight-line estimate. Manual reorder clears `leg`.
+- Other customer texts: "on my way" and "thank you" (`kind` on `/api/remind` POST, logged in `ticket.texts`). `settings.autoThanks` sends the thank-you when a job is marked paid (Twilio only).
 - Reminders: cron runs 23:00 UTC (6pm EST / 7pm EDT) and texts customers on tomorrow's schedule (`BUSINESS_TZ`), once per date. Without Twilio env vars the UI falls back to an `sms:` link on the user's own phone.
 
 ## Auth model
