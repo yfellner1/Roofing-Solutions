@@ -4,7 +4,7 @@
 //   POST — a signed-in person previews or sends one reminder right now.
 import { json, getUser, readDb, mutate, getSettings, todayYmd, addDays, weekday, str } from './_lib.js';
 import { smsConfigured, sendSms, buildMessage, e164 } from './_sms.js';
-import { recordReminder } from './_tickets.js';
+import { recordReminder, recordText } from './_tickets.js';
 
 export default {
   async fetch(request) {
@@ -43,12 +43,14 @@ export default {
     const c = db.customers[t.customerId] || {};
     const s = getSettings(db);
     const to = e164(c.phone);
-    const text = str(b.text, 600) || buildMessage(s.smsTemplate, t, c, s);
+    const kind = ['omw', 'thanks'].includes(b.kind) ? b.kind : 'reminder';
+    const template = kind === 'omw' ? s.omwTemplate : kind === 'thanks' ? s.thanksTemplate : s.smsTemplate;
+    const text = str(b.text, 600) || buildMessage(template, t, c, s);
     if (b.preview) return json({ ok: true, text, to, configured: smsConfigured(), smsOk: c.smsOk !== false });
     if (!to) return json({ error: 'This customer has no mobile number on file.' }, 400);
     if (c.smsOk === false) return json({ error: 'This customer asked not to be texted.' }, 400);
     const res = await sendSms(to, text);
-    const out = await mutate((db) => { recordReminder(db, b.id, by, res, 'app'); });
+    const out = await mutate((db) => { recordText(db, b.id, by, res, 'app', kind); });
     if (!res.ok) return json({ error: res.error, board: out.db }, 502);
     return json({ ok: true, board: out.db });
   },

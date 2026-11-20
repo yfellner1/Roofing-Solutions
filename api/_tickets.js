@@ -2,8 +2,13 @@
 // the links between tickets and office tasks. Everything here runs inside mutate(),
 // so it must stay synchronous — network work (address lookup) is done beforehand
 // in op.js and handed in as `pre`.
-import { PEOPLE, TRADES, TICKET_KINDS, stagesFor, getSettings, DEFAULT_SMS, uid, str, addActivity, isYmd, todayYmd, addDays } from './_lib.js';
-import { bestRoute } from './_geo.js';
+import { PEOPLE, TRADES, TICKET_KINDS, stagesFor, getSettings, DEFAULT_SMS, DEFAULT_OMW, DEFAULT_THANKS, uid, str, addActivity, isYmd, todayYmd, addDays } from './_lib.js';
+import { planOrder } from './_geo.js';
+
+// Phone alerts to send once the save succeeds. op.js hands in a fresh list for every attempt.
+let NOTIFY = null;
+export const setNotify = (list) => { NOTIFY = list; };
+const notify = (to, by, title, body) => { if (NOTIFY && to && to !== by) NOTIFY.push({ to, title, body }); };
 
 const pick = (v, allowed) => (allowed.includes(v) ? v : '');
 const isTime = (s) => /^([01]\d|2[0-3]):[0-5]\d$/.test(s || '');
@@ -67,6 +72,7 @@ function officeTask(db, by, ticketId, type, description, due) {
     kind: '', deposit: '', depositPaid: '', colorStatus: '', color: '',
     status: 'todo', createdBy: by, createdAt: now, updatedAt: now, number: db.seq, ticketId, auto: true,
   };
+  notify(s.officeAssignee, by, 'New task: ' + description.split(' — ')[0], (c.name || 'Ticket T-' + t.number) + (due ? ' · due ' + prettyDate(due) : ''));
   addActivity(db, id, by, 'moved ticket T-' + t.number + ' forward, which created this task for ' + s.officeAssignee);
   addActivity(db, ticketId, by, 'added task #' + db.seq + ' for ' + s.officeAssignee);
 }
@@ -83,8 +89,13 @@ function applySchedule(db, id, { date, time, assignee }, by, now) {
   const t = db.tickets[id];
   const prev = t.date || '';
   t.date = date; t.time = date ? time : '';
+  const prevWho = t.assignee || '';
   if (assignee !== undefined) t.assignee = assignee;
-  if (date !== prev) { delete t.ord; t.reminder = null; }
+  if (date !== prev) { delete t.ord; delete t.leg; t.reminder = null; }
+  if (date && t.assignee && (date !== prev || t.assignee !== prevWho)) {
+    const c = db.customers[t.customerId] || {};
+    notify(t.assignee, by, "You're on a " + (TICKET_KINDS[t.kind] || 'job').toLowerCase() + ' ' + prettyDate(date), [c.name, t.address].filter(Boolean).join(' · '));
+  }
   const label = date ? prettyDate(date) + (t.assignee ? ' with ' + t.assignee : '') : '';
   if (date && t.stage === 'ticket') { t.stage = 'scheduled'; t.stageAt = now; addActivity(db, id, by, 'scheduled this for ' + label); }
   else if (!date && t.stage === 'scheduled') { t.stage = 'ticket'; t.stageAt = now; addActivity(db, id, by, 'took this off the schedule'); }
@@ -137,9 +148,12 @@ function setStage(db, id, stage, by, o = {}) {
     case 'billed':
       officeTask(db, by, id, 'followup', 'Invoice went out — confirm the payment comes in.', addDays(todayYmd(), 14));
       break;
-    case 'paid':
+    case 'paid': {
       closeTasks(db, by, id, ['invoice', 'followup'], 'the job was marked paid');
+      const c = db.customers[t.customerId] || {};
+      if (getSettings(db).autoThanks && c.phone && c.smsOk !== false && !(t.texts && t.texts.thanks)) result.sendThanks = id;
       break;
+    }
   }
   return result;
 }
@@ -159,11 +173,29 @@ export function advanceFromTask(db, task, by) {
   }
 }
 
+// "On my way" and "thank you" texts are logged on the ticket so nobody sends them twice.
+const TEXT_LABEL = { omw: 'an "on my way" text', thanks: 'a thank-you text' };
+export function recordText(db, id, by, res, via, kind) {
+  if (!TEXT_LABEL[kind]) return recordReminder(db, id, by, res, via);
+  const t = db.tickets[id];
+  if (!t) return;
+  if (res.ok) t.texts = { ...(t.texts || {}), [kind]: { at: Date.now(), by, via } };
+  addActivity(db, id, by, res.ok ? 'sent the customer ' + TEXT_LABEL[kind] + (via === 'auto' ? ' (automatic)' : '') : 'tried to send ' + TEXT_LABEL[kind] + ' but it failed: ' + str(res.error, 200));
+}
+
 export function recordReminder(db, id, by, res, via) {
   const t = db.tickets[id];
   if (!t) return;
   t.reminder = { forDate: t.date || '', at: Date.now(), by, via, status: res.ok ? 'sent' : 'failed', error: res.ok ? '' : str(res.error, 200) };
   addActivity(db, id, by, res.ok ? (via === 'auto' ? 'texted the customer a reminder (automatic)' : 'texted the customer a reminder') : 'tried to text a reminder but it failed: ' + t.reminder.error);
+}
+
+// A day's stops still to do, in their current order. Shared with op.js, which plans the route.
+export function dayStops(db, date, assignee) {
+  return Object.entries(db.tickets)
+    .filter(([, t]) => t.date === date && t.stage === 'scheduled' && (!assignee || t.assignee === assignee))
+    .map(([id, t]) => ({ id, lat: t.lat, lng: t.lng, ord: t.ord ?? 999, time: t.time || '', at: t.createdAt }))
+    .sort((x, y) => x.ord - y.ord || ((x.time || '99') < (y.time || '99') ? -1 : (x.time || '99') > (y.time || '99') ? 1 : 0) || x.at - y.at);
 }
 
 // Returns a result for ticket/customer/settings actions, or undefined if `b.op` is not one.
@@ -258,6 +290,10 @@ export function ticketOp(db, b, by, pre = {}) {
         skipDays: Array.isArray(d.skipDays) ? [0, 1, 2, 3, 4, 5, 6].filter((n) => d.skipDays.includes(n)) : [],
         autoTasks: d.autoTasks !== false,
         officeAssignee: pick(d.officeAssignee, PEOPLE) || cur.officeAssignee,
+        omwTemplate: str(d.omwTemplate, 600) || DEFAULT_OMW,
+        thanksTemplate: str(d.thanksTemplate, 600) || DEFAULT_THANKS,
+        reviewLink: /^https?:\/\/\S+$/i.test(str(d.reviewLink, 300)) ? str(d.reviewLink, 300) : '',
+        autoThanks: d.autoThanks === true,
       };
       return { ok: true };
     }
@@ -270,21 +306,26 @@ export function ticketOp(db, b, by, pre = {}) {
       const s = getSettings(db);
       if (pre.shop && pre.shop.address === s.shopAddress && pre.shop.lat != null) db.settings = { ...s, shopLat: pre.shop.lat, shopLng: pre.shop.lng };
       const shop = getSettings(db);
-      const stops = Object.entries(db.tickets)
-        .filter(([, t]) => t.date === b.date && t.stage === 'scheduled' && (!b.assignee || t.assignee === b.assignee))
-        .map(([id, t]) => ({ id, lat: t.lat, lng: t.lng, ord: t.ord ?? 999, time: t.time || '99', at: t.createdAt }))
-        .sort((x, y) => x.ord - y.ord || (x.time < y.time ? -1 : x.time > y.time ? 1 : 0) || x.at - y.at);
-      const ordered = bestRoute(stops, hasGeo({ lat: shop.shopLat, lng: shop.shopLng }) ? { lat: shop.shopLat, lng: shop.shopLng } : null);
-      ordered.forEach((x, i) => { db.tickets[x.id].ord = i + 1; });
-      return { count: ordered.length, missing: ordered.filter((x) => !hasGeo(x)).length };
+      const stops = dayStops(db, b.date, b.assignee);
+      const start = hasGeo({ lat: shop.shopLat, lng: shop.shopLng }) ? { lat: shop.shopLat, lng: shop.shopLng } : null;
+      // op.js may already have asked Google for the order and real drive times.
+      const g = pre.route;
+      const known = g && g.order.length === stops.length && g.order.every((id) => stops.some((x) => x.id === id));
+      const ordered = known ? g.order.map((id) => stops.find((x) => x.id === id)) : planOrder(stops, start);
+      ordered.forEach((x, i) => {
+        const t = db.tickets[x.id];
+        t.ord = i + 1;
+        if (known && g.legs[x.id]) t.leg = { ...g.legs[x.id], d: b.date }; else delete t.leg;
+      });
+      return { count: ordered.length, missing: ordered.filter((x) => !hasGeo(x)).length, drive: known ? 'google' : 'estimate', timed: stops.filter((x) => x.time).length };
     }
     case 'reorder': {
-      (Array.isArray(b.ids) ? b.ids : []).forEach((id, i) => { if (db.tickets[id]) db.tickets[id].ord = i + 1; });
+      (Array.isArray(b.ids) ? b.ids : []).forEach((id, i) => { if (db.tickets[id]) { db.tickets[id].ord = i + 1; delete db.tickets[id].leg; } });
       return { ok: true };
     }
     case 'reminded': {
       if (!db.tickets[b.id]) return { error: 'That ticket no longer exists.' };
-      recordReminder(db, b.id, by, { ok: true }, 'phone');
+      recordText(db, b.id, by, { ok: true }, 'phone', b.kind);
       return { id: b.id };
     }
   }

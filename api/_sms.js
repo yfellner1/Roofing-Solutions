@@ -36,6 +36,8 @@ export function buildMessage(template, ticket, customer, settings) {
     first: name.split(/\s+/)[0] || 'there', name: name || 'there', when, date: date ? niceDate(date) : '',
     time: ticket.time ? ' around ' + niceTime(ticket.time) : '', service, address: ticket.address || customer?.address || 'your property',
     company_phone: settings.companyPhone || 'us',
+    review_link: settings.reviewLink || '',
+    review: settings.reviewLink ? 'If you have a moment, a review would mean a lot: ' + settings.reviewLink : '',
   };
   return String(template || '').replace(/\{(\w+)\}/g, (all, k) => (k in vars ? vars[k] : all)).replace(/\s+/g, ' ').trim().slice(0, 600);
 }

@@ -67,3 +67,62 @@ export function bestRoute(stops, start) {
   }
   return [...best, ...rest];
 }
+
+// Day order when some stops have a set arrival time: timed stops stay in clock order
+// and every other stop is slotted in wherever it adds the least driving.
+export function planOrder(stops, start) {
+  const ok = (s) => Number.isFinite(s.lat) && Number.isFinite(s.lng);
+  const timed = stops.filter((s) => s.time).sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
+  if (!timed.length) return bestRoute(stops, start);
+  const seq = timed.slice();
+  const hasStart = start && ok(start);
+  const d = (a, b) => (a && b && ok(a) && ok(b) ? miles(a, b) : 0);
+  for (const s of bestRoute(stops.filter((x) => !x.time && ok(x)), start)) {
+    let at = seq.length, cost = Infinity;
+    for (let i = 0; i <= seq.length; i++) {
+      const prev = i ? seq[i - 1] : hasStart ? start : null, next = seq[i] || null;
+      const add = d(prev, s) + d(s, next) - d(prev, next);
+      if (add < cost) { cost = add; at = i; }
+    }
+    seq.splice(at, 0, s);
+  }
+  return [...seq, ...stops.filter((x) => !x.time && !ok(x))];
+}
+
+// Real driving times from Google (needs GOOGLE_MAPS_KEY with the Routes API enabled).
+// `ordered` is the planned order; with `optimize` Google may reorder it. Returns
+// { order: [ids], legs: { id: { mi, min } } } or null if Google can't be used.
+export async function driveRoute(ordered, start, optimize) {
+  const key = process.env.GOOGLE_MAPS_KEY;
+  const pts = ordered.filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.lng));
+  const hasStart = start && Number.isFinite(start.lat) && Number.isFinite(start.lng);
+  if (!key || pts.length < (hasStart ? 1 : 2) || pts.length > 25 || pts.length !== ordered.length) return null;
+  const wp = (p) => ({ location: { latLng: { latitude: p.lat, longitude: p.lng } } });
+  // With a shop and free ordering, plan a loop from the shop and back. Otherwise drive the list end to end.
+  const loop = hasStart && optimize;
+  const origin = hasStart ? start : pts[0];
+  const destination = loop ? start : pts[pts.length - 1];
+  const mid = loop ? pts : pts.slice(hasStart ? 0 : 1, -1);
+  try {
+    const r = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key, 'x-goog-fieldmask': 'routes.optimizedIntermediateWaypointIndex,routes.legs.duration,routes.legs.distanceMeters' },
+      body: JSON.stringify({ origin: wp(origin), destination: wp(destination), intermediates: mid.map(wp), travelMode: 'DRIVE', routingPreference: 'TRAFFIC_UNAWARE', optimizeWaypointOrder: !!optimize && mid.length > 1 }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!r.ok) { console.warn('routes api', r.status); return null; }
+    const route = (await r.json()).routes?.[0];
+    if (!route?.legs?.length) return null;
+    const idx = route.optimizedIntermediateWaypointIndex;
+    const midOrder = Array.isArray(idx) && idx.length === mid.length && idx.every((i) => i >= 0) ? idx.map((i) => mid[i]) : mid;
+    const visit = loop ? midOrder : [...(hasStart ? [] : [pts[0]]), ...midOrder, pts[pts.length - 1]];
+    const legs = {};
+    // legs[i] ends at the i-th point after the origin.
+    const after = hasStart ? visit : visit.slice(1);
+    after.forEach((p, i) => {
+      const leg = route.legs[i];
+      if (leg) legs[p.id] = { mi: Math.round(((leg.distanceMeters || 0) / 1609.344) * 10) / 10, min: Math.round(parseInt(leg.duration || '0', 10) / 60) };
+    });
+    return { order: visit.map((p) => p.id), legs };
+  } catch (e) { console.warn('routes api failed', e.message); return null; }
+}

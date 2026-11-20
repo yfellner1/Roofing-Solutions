@@ -1,6 +1,10 @@
 import { json, getUser, mutate, readDb, getSettings, PEOPLE, TYPES, STATUSES, uid, str, addActivity, removeBlob } from './_lib.js';
-import { ticketOp, advanceFromTask } from './_tickets.js';
-import { geocode } from './_geo.js';
+import { ticketOp, advanceFromTask, setNotify, dayStops, recordText } from './_tickets.js';
+import { geocode, planOrder, driveRoute } from './_geo.js';
+import { sendPush } from './_push.js';
+import { smsConfigured, sendSms, buildMessage } from './_sms.js';
+
+const TYPE_LABEL = { schedule: 'Schedule job', estimate: 'Send estimate', estfollow: 'Follow up on estimate', invoice: 'Send invoice', check: 'Prepare check', followup: 'Follow up on payment', deposit: 'Collect deposit', other: 'Task' };
 
 // Address lookups talk to the network, so they happen before the save, never inside it.
 async function prepare(b) {
@@ -29,6 +33,15 @@ async function prepare(b) {
       const todo = Object.entries(db.tickets).filter(([, t]) => t.date === b.date && t.address && t.lat == null).slice(0, 15);
       pre.geos = {};
       await Promise.all(todo.map(async ([id, t]) => { const g = await geocode(t.address); pre.geos[id] = { address: t.address, lat: g?.lat ?? null, lng: g?.lng ?? null }; }));
+      // Real drive times (and Google's ordering when no stop has a fixed time), if a Google key is set.
+      if (process.env.GOOGLE_MAPS_KEY) {
+        for (const [id, g] of Object.entries(pre.geos)) if (g.lat != null) { db.tickets[id].lat = g.lat; db.tickets[id].lng = g.lng; }
+        const lat = pre.shop?.lat ?? s.shopLat, lng = pre.shop?.lng ?? s.shopLng;
+        const start = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+        const stops = dayStops(db, b.date, pick(b.assignee, PEOPLE));
+        const timed = stops.some((x) => x.time);
+        pre.route = await driveRoute(planOrder(stops, start), start, !timed);
+      }
     }
   } catch (e) { console.warn('prepare failed', e); }
   return pre;
@@ -69,11 +82,15 @@ export default {
     let b;
     try { b = await request.json(); } catch { return json({ error: 'Bad request' }, 400); }
     const blobsToDelete = [];
+    const notify = [];
+    const tell = (to, title, body) => { if (to && to !== by) notify.push({ to, title, body }); };
     const pre = await prepare(b);
 
     try {
-      const { db, result } = await mutate((db) => {
+      let { db, result } = await mutate((db) => {
         const now = Date.now();
+        notify.length = 0; // a retried save must not double up alerts
+        setNotify(notify);
         switch (b.op) {
           case 'create': {
             const t = cleanTask(b.data || {});
@@ -84,6 +101,7 @@ export default {
             db.tasks[id] = { ...t, status: 'todo', createdBy: by, createdAt: now, updatedAt: now, number: db.seq };
             addActivity(db, id, by, 'created this task and assigned it to ' + t.assignee);
             if (t.ticketId) addActivity(db, t.ticketId, by, 'added task #' + db.seq + ' for ' + t.assignee);
+            tell(t.assignee, by + ' gave you a task: ' + TYPE_LABEL[t.type], [t.customer, t.due ? 'due ' + t.due.slice(5).replace('-', '/') : ''].filter(Boolean).join(' · '));
             return { id, number: db.seq };
           }
           case 'update': {
@@ -94,6 +112,7 @@ export default {
             t.ticketId = db.tickets[b.data?.ticketId] ? b.data.ticketId : (db.tickets[old.ticketId] && b.data?.ticketId === undefined ? old.ticketId : '');
             db.tasks[b.id] = { ...old, ...t, updatedAt: now };
             addActivity(db, b.id, by, old.assignee !== t.assignee ? 'reassigned this to ' + t.assignee : 'edited the task details');
+            if (old.assignee !== t.assignee) tell(t.assignee, by + ' gave you a task: ' + TYPE_LABEL[t.type], t.customer);
             return { id: b.id };
           }
           case 'status': {
@@ -112,6 +131,8 @@ export default {
             if (!text) return { error: 'Write a note first.' };
             db.notes[uid()] = { taskId: b.id, by, at: now, text, kind: 'note' };
             task.updatedAt = now;
+            const what = db.tasks[b.id] ? 'task #' + task.number : 'ticket T-' + task.number;
+            for (const to of new Set([task.assignee, db.tasks[b.id] ? task.createdBy : ''])) tell(to, by + ' added a note on ' + what, text.slice(0, 120));
             return { id: b.id };
           }
           case 'delete': {
@@ -137,8 +158,20 @@ export default {
           }
         }
       });
+      setNotify(null);
       for (const p of blobsToDelete) await removeBlob(p);
       if (result && result.error) return json({ error: result.error, board: db }, 400);
+      if (notify.length) await sendPush(notify);
+      // Optional automatic thank-you text when a job is marked paid.
+      if (result && result.sendThanks) {
+        const id = result.sendThanks; delete result.sendThanks;
+        const t = db.tickets[id], c = t && db.customers[t.customerId];
+        if (t && c && smsConfigured()) {
+          const s = getSettings(db);
+          const res = await sendSms(c.phone, buildMessage(s.thanksTemplate, t, c, s));
+          db = (await mutate((db) => { recordText(db, id, 'Automatic text', res, 'auto', 'thanks'); })).db;
+        }
+      }
       return json({ ok: true, result, board: db });
     } catch (e) {
       console.error(e);

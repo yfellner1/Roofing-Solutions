@@ -1,6 +1,6 @@
 // Tickets, customers, pipelines, routing and reminders. Network calls are stubbed.
 import assert from 'node:assert/strict';
-const sent = [];
+const sent = [], routeCalls = [];
 const COORDS = { '1 North St': [41.10, -74.00], '2 Far East Rd': [41.10, -73.50], '3 Middle Ave': [41.10, -73.75], '9 Shop West Rd': [41.10, -74.05] };
 globalThis.fetch = async (url, opts) => {
   url = String(url);
@@ -20,6 +20,13 @@ globalThis.fetch = async (url, opts) => {
     return new Response(JSON.stringify({ suggestions: b.locationRestriction ? [] : [{ placePrediction: { placeId: 'pid_1', text: { text: '14 Maple Ave, Monsey, NY, USA' } } }] }));
   }
   if (url.includes('places.googleapis.com/v1/places/pid_1')) return new Response(JSON.stringify({ formattedAddress: '14 Maple Ave, Monsey, NY 10952, USA', location: { latitude: 41.1, longitude: -74.07 } }));
+  if (url.includes('routes.googleapis.com')) {
+    const b = JSON.parse(opts.body);
+    routeCalls.push(b);
+    const n = b.intermediates.length;
+    // Pretend Google reverses the middle stops when asked to optimise.
+    return new Response(JSON.stringify({ routes: [{ optimizedIntermediateWaypointIndex: b.optimizeWaypointOrder ? [...Array(n).keys()].reverse() : [], legs: [...Array(n + 1)].map((_, i) => ({ duration: (600 + i * 60) + 's', distanceMeters: 8046.72 })) }] }));
+  }
   if (url.includes('api.twilio.com')) { sent.push(Object.fromEntries(opts.body)); return new Response(JSON.stringify({ sid: 'SM1' }), { status: 201 }); }
   throw new Error('unexpected fetch ' + url);
 };
@@ -27,7 +34,10 @@ const { default: auth } = await import('../api/auth.js');
 const { default: op } = await import('../api/op.js');
 const { default: remind } = await import('../api/remind.js');
 const { todayYmd, addDays } = await import('../api/_lib.js');
-const { bestRoute } = await import('../api/_geo.js');
+const { bestRoute, planOrder } = await import('../api/_geo.js');
+const { default: nightly } = await import('../api/nightly.js');
+const { default: backup } = await import('../api/backup.js');
+const { default: push } = await import('../api/push.js');
 const { e164 } = await import('../api/_sms.js');
 
 const login = async (pin) => (await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ pin }) }))).headers.get('set-cookie').split(';')[0];
@@ -137,6 +147,71 @@ assert.deepEqual((await gq('id=pid_1&s=abc')).result, { label: '14 Maple Ave, Mo
 delete process.env.GOOGLE_MAPS_KEY;
 r = await post({ op: 'ticketCreate', data: { kind: 'repair', customer: { name: 'Geo Pick' }, address: 'Nowhere Known Rd', geo: { address: 'Nowhere Known Rd', lat: 40.5, lng: -74.5 } } });
 assert.equal(r.board.tickets[r.result.id].lat, 40.5, 'picked suggestion supplies the map point');
+
+// --- route planning: fixed times stay in clock order, real drive times from Google
+const tp = [{ id: 'late', lat: 0, lng: 1, time: '14:00' }, { id: 'early', lat: 0, lng: 5, time: '08:00' }, { id: 'free', lat: 0, lng: 4.5 }, { id: 'free2', lat: 0, lng: 0.5 }];
+assert.equal(planOrder(tp, { lat: 0, lng: 0 }).map((x) => x.id).join(','), 'free2,free,early,late', 'untimed stops slot in around the appointments (early stays before late)');
+const day = addDays(tomorrow, 5);
+const mkStop = async (name, addr, time) => (await post({ op: 'ticketCreate', data: { kind: 'repair', customer: { name, phone: '845555' + String(1000 + name.charCodeAt(5)) }, address: addr, date: day, time } })).result.id;
+const sA = await mkStop('Stop A', '1 North St', ''), sB = await mkStop('Stop B', '3 Middle Ave', ''), sC = await mkStop('Stop C', '2 Far East Rd', '');
+r = await post({ op: 'route', date: day });
+assert.equal(r.result.drive, 'estimate', 'no Google key: straight-line estimate');
+assert.ok(!r.board.tickets[sA].leg);
+process.env.GOOGLE_MAPS_KEY = 'k';
+r = await post({ op: 'route', date: day });
+assert.equal(r.result.drive, 'google');
+assert.ok(routeCalls.at(-1).optimizeWaypointOrder, 'no fixed times: Google may reorder');
+assert.deepEqual([r.board.tickets[sC].ord, r.board.tickets[sB].ord, r.board.tickets[sA].ord], [1, 2, 3], "Google's order is saved");
+assert.deepEqual(r.board.tickets[sC].leg, { mi: 5, min: 10, d: day }, 'real minutes and miles are stored per stop');
+await post({ op: 'ticketSchedule', id: sB, date: day, time: '07:30', assignee: '' });
+r = await post({ op: 'route', date: day });
+assert.equal(routeCalls.at(-1).optimizeWaypointOrder, false, 'a fixed time stops Google reordering');
+assert.equal(r.board.tickets[sB].ord, 2, 'shop → A (on the way) → B at 7:30');
+r = await post({ op: 'reorder', ids: [sC, sA, sB] });
+assert.ok(!r.board.tickets[sA].leg, 'moving a stop by hand clears the stale drive time');
+delete process.env.GOOGLE_MAPS_KEY;
+
+// --- on-my-way and thank-you texts
+const before = sent.length;
+let tx = await rp({ id: sA, kind: 'omw', preview: true });
+assert.ok(tx.text.includes('on the way to 1 North St'), tx.text);
+r = await rp({ id: sA, kind: 'omw' });
+assert.equal(sent.length, before + 1);
+assert.ok(r.board.tickets[sA].texts.omw.at && !r.board.tickets[sA].reminder, 'logged as on-my-way, not as the reminder');
+await post({ op: 'settings', data: { shopAddress: '9 Shop West Rd', companyPhone: '845-555-0000', reviewLink: 'https://g.page/r/abc', autoThanks: true } });
+tx = await rp({ id: sA, kind: 'thanks', preview: true });
+assert.ok(tx.text.includes('https://g.page/r/abc'), tx.text);
+await post({ op: 'ticketCreate', data: { kind: 'repair', customer: { name: 'Pay Me', phone: '8455550303' }, address: '1 North St', date: day } }).then(async (x) => {
+  for (const st of ['completed', 'billed']) await post({ op: 'ticketStage', id: x.result.id, stage: st });
+  const n = sent.length;
+  const done = await post({ op: 'ticketStage', id: x.result.id, stage: 'paid' });
+  assert.equal(sent.length, n + 1, 'paid sends the thank-you automatically when that is switched on');
+  assert.ok(done.board.tickets[x.result.id].texts.thanks && !('sendThanks' in done.result));
+});
+
+// --- nightly backup + restore
+assert.equal((await nightly.fetch(new Request('https://x/api/nightly'))).status, 401);
+const nb = await (await nightly.fetch(new Request('https://x/api/nightly', { headers: { authorization: 'Bearer cronsecret' } }))).json();
+assert.ok(nb.backup.ok && nb.backup.name.startsWith('backups/board-') && nb.reminders.ok, JSON.stringify(nb));
+const bk = (m, body, c = cookie) => backup.fetch(new Request('https://x/api/backup', { method: m, headers: { cookie: c }, body: body && JSON.stringify(body) })).then(async (x) => ({ status: x.status, ...(await x.json()) }));
+let bl = await bk('GET');
+assert.equal(bl.backups.length, 1);
+const countBefore = Object.keys((await post({ op: 'reorder', ids: [] })).board.tickets).length;
+await post({ op: 'ticketDelete', id: sA }); await post({ op: 'ticketDelete', id: sB });
+const benCookie = await login('22222222');
+assert.equal((await bk('POST', { action: 'restore', name: bl.backups[0].name }, benCookie)).status, 403, 'foremen cannot restore');
+assert.equal((await bk('POST', { action: 'restore', name: '../db/board.json' })).status, 400);
+const rs = await bk('POST', { action: 'restore', name: bl.backups[0].name });
+assert.equal(Object.keys(rs.board.tickets).length, countBefore, 'restore brings deleted tickets back');
+bl = await bk('GET');
+assert.ok(bl.backups.some((x) => x.name.startsWith('backups/before-restore-')), 'the board as it was is kept, so a restore can be undone');
+assert.ok((await bk('POST', { action: 'now' })).ok);
+
+// --- alerts endpoint (no keys in tests: reports not set up, saving still works)
+const pg = await (await push.fetch(new Request('https://x/api/push', { headers: { cookie } }))).json();
+assert.equal(pg.configured, false);
+r = await post({ op: 'create', data: { type: 'other', assignee: 'Ben', customer: 'Alert Check' } });
+assert.ok(r.ok, 'saving works when alerts are not configured');
 
 // --- cleanup rules
 assert.ok((await post({ op: 'customerDelete', id: r.board.tickets[mid].customerId })).error);

@@ -15,3 +15,4 @@ export async function put(p, d, o) {
   store.set(p, { data: d, etag: '"e' + (++n) + '"', ct: o.contentType }); return {};
 }
 export async function del(p) { store.delete(p); }
+export async function list({ prefix = '' } = {}) { return { blobs: [...store.keys()].filter((k) => k.startsWith(prefix)).map((k) => ({ pathname: k, size: String(store.get(k).data).length, uploadedAt: new Date() })), hasMore: false }; }
