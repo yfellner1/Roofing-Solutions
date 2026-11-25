@@ -18,6 +18,6 @@ const r = await photo.fetch(new Request('https://x/api/photo?taskId=' + id, { me
 assert.equal(Object.values((await r.json()).board.photos)[0].by, 'Ben');
 const all = await (await board.fetch(new Request('https://x/api/board', { headers: { cookie: L.cookie } }))).json();
 assert.equal(Object.values(all.notes).filter((x) => x.kind === 'note').length, 5, 'no simultaneous notes lost');
-const d = await post(L.cookie, { op: 'delete', id });
+const d = await post(B.cookie, { op: 'delete', id });
 assert.equal(Object.keys(d.board.tasks).length + Object.keys(d.board.photos).length, 0);
 console.log('all checks passed');

@@ -7,10 +7,12 @@ const PATH = 'db/users.json';
 export const ROLES = { admin: 'Admin', editor: 'Editor' };
 export const TITLES = ['Owner', 'Office staff', 'Bookkeeper', 'Foreman', 'Crew', 'Other'];
 const COLORS = ['#A8252B', '#1F2326', '#6B4E9B', '#2D6A8E', '#5C6B2E', '#B4540A', '#1F7A7A', '#8E2D6A', '#4A5056', '#2C7A4B'];
-// The original six. On first run they become accounts whose password is the 8-digit code they already use.
+// First run: the original six become editor accounts whose password is the 8-digit code they
+// already use, plus one admin account, ReliableOS, whose password comes from ADMIN_PASSWORD.
 const FIRST = [
-  ['loriale', 'Loriale', 'Office staff', 'admin'], ['mayer', 'Mayer', 'Owner', 'admin'], ['salcer', 'Mrs. Salcer', 'Bookkeeper', 'editor'],
+  ['loriale', 'Loriale', 'Office staff', 'editor'], ['mayer', 'Mayer', 'Owner', 'editor'], ['salcer', 'Mrs. Salcer', 'Bookkeeper', 'editor'],
   ['ben', 'Ben', 'Foreman', 'editor'], ['klein', 'Mr. Klein', 'Foreman', 'editor'], ['yehuda', 'Yehuda', 'Foreman', 'editor'],
+  ['reliableos', 'ReliableOS', 'Other', 'admin'],
 ];
 
 // Names of everyone who can currently be given work. Refreshed on every request (see syncPeople).
@@ -40,7 +42,8 @@ function seed() {
   const users = {};
   FIRST.forEach(([username, name, title, role], i) => {
     // No code on file → a random password nobody knows; an admin sets a real one.
-    const pw = pins[name] ? String(pins[name]) : crypto.randomBytes(24).toString('hex');
+    const known = role === 'admin' ? process.env.ADMIN_PASSWORD : pins[name];
+    const pw = known ? String(known) : crypto.randomBytes(24).toString('hex');
     users[newId() + i] = { username, name, title, role, active: true, color: COLORS[i % COLORS.length], ...hashPassword(pw), stamp: newStamp(), createdAt: Date.now() };
   });
   return { users };

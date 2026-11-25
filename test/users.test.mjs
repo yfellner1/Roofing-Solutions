@@ -9,8 +9,9 @@ const signIn = async (username, password) => { const r = await auth.fetch(new Re
 const call = async (h, cookie, method, body) => { const r = await h.fetch(new Request('https://x/api/x', { method, headers: { cookie }, body: body && JSON.stringify(body) })); return { status: r.status, ...(await r.json()), cookie: (r.headers.get('set-cookie') || '').split(';')[0] }; };
 
 // first run: the original six become accounts; their old 8-digit code is the password
-const L = await signIn('Loriale ', '11111111');
-assert.deepEqual([L.status, L.body.name, L.body.role], [200, 'Loriale', 'admin'], 'username is not case-sensitive');
+const L = await signIn('ReliableOS ', 'adminpass1');
+assert.deepEqual([L.status, L.body.name, L.body.role], [200, 'ReliableOS', 'admin'], 'username is not case-sensitive');
+for (const [u, p] of [['loriale', '11111111'], ['mayer', '33333333']]) assert.equal((await signIn(u, p)).body.role, 'editor', 'everyone else starts as an editor');
 const B = await signIn('ben', '22222222');
 assert.equal(B.body.role, 'editor');
 assert.equal((await signIn('ben', 'wrong-password')).status, 401);
@@ -40,7 +41,7 @@ assert.ok((await U({ action: 'add', name: 'Dovid', username: 'dovid', role: 'edi
 assert.ok((await U({ action: 'add', name: 'Dovid', username: 'ben', role: 'editor', password: 'password1' })).error.includes('taken'));
 assert.ok((await U({ action: 'add', name: 'ben', username: 'ben2', role: 'editor', password: 'password1' })).error.includes('name'));
 r = await U({ action: 'add', name: 'Dovid', username: 'dovid', role: 'editor', title: 'Crew', password: 'password1' });
-assert.ok(r.ok && r.users.length === 7);
+assert.ok(r.ok && r.users.length === 8);
 const did = r.users.find((u) => u.username === 'dovid').id;
 let D = await signIn('dovid', 'password1');
 assert.equal(D.body.name, 'Dovid');
@@ -54,13 +55,12 @@ assert.ok(r.ok);
 const bd = await call(board, L.cookie, 'GET');
 assert.equal(bd.tasks[dTask].assignee, 'Dovid K.', 'renaming moves their tasks to the new name');
 assert.ok(bd.people.some((p) => p.name === 'Dovid K.' && p.title === 'Foreman'));
-const lid = r.users.find((u) => u.username === 'loriale').id, mid = r.users.find((u) => u.username === 'mayer').id;
-assert.ok((await U({ action: 'update', id: lid, name: 'Loriale', role: 'editor', active: true })).error.includes('own admin'));
-assert.ok((await U({ action: 'update', id: lid, name: 'Loriale', role: 'admin', active: false })).error.includes('own account'));
-assert.ok((await U({ action: 'update', id: mid, name: 'Mayer', role: 'editor', active: true })).ok, 'another admin can be made an editor');
-const M = await signIn('mayer', '33333333');
-assert.equal(M.body.role, 'editor');
-await U({ action: 'update', id: mid, name: 'Mayer', role: 'admin', active: true });
+const lid = r.users.find((u) => u.username === 'reliableos').id, mid = r.users.find((u) => u.username === 'mayer').id;
+assert.ok((await U({ action: 'update', id: lid, name: 'ReliableOS', role: 'editor', active: true })).error.includes('own admin'));
+assert.ok((await U({ action: 'update', id: lid, name: 'ReliableOS', role: 'admin', active: false })).error.includes('own account'));
+assert.ok((await U({ action: 'update', id: mid, name: 'Mayer', role: 'admin', active: true })).ok, 'an editor can be made an admin');
+assert.equal((await signIn('mayer', '33333333')).body.role, 'admin');
+assert.ok((await U({ action: 'update', id: mid, name: 'Mayer', role: 'editor', active: true })).ok, 'and back to an editor');
 
 // switching an account off signs them out and blocks sign-in; back on works again
 await U({ action: 'update', id: did, name: 'Dovid K.', role: 'editor', title: 'Foreman', active: false });

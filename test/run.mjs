@@ -10,7 +10,7 @@ rmSync(dest, { recursive: true, force: true });
 mkdirSync(dest, { recursive: true });
 cpSync(path.join(root, 'test/mock-blob'), dest, { recursive: true });
 const env = { ...process.env, AUTH_SECRET: 'test', USER_PINS: JSON.stringify({ Loriale: '11111111', Ben: '22222222', Mayer: '33333333' }),
-  CRON_SECRET: 'cronsecret', TWILIO_ACCOUNT_SID: 'AC1', TWILIO_AUTH_TOKEN: 'tok', TWILIO_FROM: '+18455550100' };
+  CRON_SECRET: 'cronsecret', ADMIN_PASSWORD: 'adminpass1', TWILIO_ACCOUNT_SID: 'AC1', TWILIO_AUTH_TOKEN: 'tok', TWILIO_FROM: '+18455550100' };
 try {
   for (const MODE of ['normal', 'weak', 'diff']) {
     console.log('== etag mode:', MODE);

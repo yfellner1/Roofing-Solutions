@@ -51,12 +51,12 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 - Admins manage people in the app (account button → Manage users → `api/users.js`): add, rename, job title, role, "can sign in", set a new password. Guards: at least one active admin; you can't demote or switch off yourself. Everyone can change their own password.
 - Cookie = base64url(user id) + HMAC(AUTH_SECRET, id:stamp). The stamp changes on password change/reset and on/off, which signs that person out everywhere. 8 wrong passwords lock an account for 10 minutes.
 - `PEOPLE` (server) is the live list of active display names, refreshed from `users.json` on every request via `getAuth`. Work is stored by display name, so a rename rewrites assignee/author fields (`renameEverywhere` in `users.js`).
-- First run only: if `users.json` does not exist, the original six are created with usernames loriale, mayer, salcer, ben, klein, yehuda and their old 8-digit code from `USER_PINS` as the password (Loriale and Mayer are admins). After that `USER_PINS` is unused.
+- First run only: if `users.json` does not exist, the original six are created as **editors** with usernames loriale, mayer, salcer, ben, klein, yehuda and their old 8-digit code from `USER_PINS` as the password, plus the one **admin** account `reliableos` (Reliable OS runs the board) whose password comes from `ADMIN_PASSWORD`. After that both env vars are unused.
 - Job title Foreman or Crew = shown as a row in the week calendar and gets the "My stops" view.
 
 ## Develop / test / deploy
 - Server logic tests (no network, mocked Blob): `node test/run.mjs`
-- Safe local preview (in-memory, nothing saved): `node test/dev.mjs` → http://localhost:3000, sign in as loriale / 11111111 (admin), ben / 22222222, mayer / 33333333. `FAKE_GEO=1` fakes map points.
+- Safe local preview (in-memory, nothing saved): `node test/dev.mjs` → http://localhost:3000, sign in as reliableos / adminpass1 (admin), loriale / 11111111, ben / 22222222, mayer / 33333333. `FAKE_GEO=1` fakes map points.
 - Local run with real storage: `npm i -g vercel`, `vercel link` (team: reliable-os, project: roofing-solutions-tasks), `vercel env pull .env.local`, `vercel dev`.
   Note: local dev writes to the SAME live Blob store — use a test task and delete it.
 - Deploy: `vercel --prod` (or connect a GitHub repo to the project for auto-deploys).

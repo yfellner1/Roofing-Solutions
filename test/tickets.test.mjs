@@ -40,9 +40,9 @@ const { default: backup } = await import('../api/backup.js');
 const { default: push } = await import('../api/push.js');
 const { e164 } = await import('../api/_sms.js');
 
-const NAMES = { 11111111: 'loriale', 22222222: 'ben', 33333333: 'mayer' };
+const NAMES = { adminpass1: 'reliableos', 11111111: 'loriale', 22222222: 'ben', 33333333: 'mayer' };
 const login = async (pin) => (await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ username: NAMES[pin], password: pin }) }))).headers.get('set-cookie').split(';')[0];
-const cookie = await login('11111111');
+const cookie = await login('adminpass1');
 const post = async (b) => { const r = await op.fetch(new Request('https://x/api/op', { method: 'POST', headers: { cookie, 'content-type': 'application/json' }, body: JSON.stringify(b) })); return r.json(); };
 const tomorrow = addDays(todayYmd(), 1);
 

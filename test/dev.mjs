@@ -1,5 +1,5 @@
 // Local preview with NO real storage: everything lives in memory and is lost on exit.
-// Usage: node test/dev.mjs   → http://localhost:3000   (sign in: loriale / 11111111 (admin), ben / 22222222, mayer / 33333333)
+// Usage: node test/dev.mjs   → http://localhost:3000   (sign in: reliableos / adminpass1 (admin), loriale / 11111111, ben / 22222222, mayer / 33333333)
 // FAKE_GEO=1 places addresses at made-up map points so routes work offline.
 import { mkdirSync, cpSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -13,7 +13,7 @@ cpSync(path.join(root, 'test/mock-blob'), dest, { recursive: true });
 process.on('exit', () => rmSync(dest, { recursive: true, force: true }));
 process.on('SIGINT', () => process.exit());
 process.on('SIGTERM', () => process.exit());
-Object.assign(process.env, { AUTH_SECRET: 'dev', USER_PINS: JSON.stringify({ Loriale: '11111111', Ben: '22222222', Mayer: '33333333' }) });
+Object.assign(process.env, { AUTH_SECRET: 'dev', ADMIN_PASSWORD: 'adminpass1', USER_PINS: JSON.stringify({ Loriale: '11111111', Ben: '22222222', Mayer: '33333333' }) });
 if (process.env.FAKE_GEO) {
   const real = globalThis.fetch;
   globalThis.fetch = async (url, o) => {
