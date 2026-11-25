@@ -4,7 +4,7 @@ const TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 
 export default {
   async fetch(request) {
-    const by = getUser(request);
+    const by = await getUser(request);
     if (!by) return json({ error: 'Sign in required' }, 401);
     const url = new URL(request.url);
 

@@ -40,7 +40,8 @@ const { default: backup } = await import('../api/backup.js');
 const { default: push } = await import('../api/push.js');
 const { e164 } = await import('../api/_sms.js');
 
-const login = async (pin) => (await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ pin }) }))).headers.get('set-cookie').split(';')[0];
+const NAMES = { 11111111: 'loriale', 22222222: 'ben', 33333333: 'mayer' };
+const login = async (pin) => (await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ username: NAMES[pin], password: pin }) }))).headers.get('set-cookie').split(';')[0];
 const cookie = await login('11111111');
 const post = async (b) => { const r = await op.fetch(new Request('https://x/api/op', { method: 'POST', headers: { cookie, 'content-type': 'application/json' }, body: JSON.stringify(b) })); return r.json(); };
 const tomorrow = addDays(todayYmd(), 1);
@@ -199,7 +200,7 @@ assert.equal(bl.backups.length, 1);
 const countBefore = Object.keys((await post({ op: 'reorder', ids: [] })).board.tickets).length;
 await post({ op: 'ticketDelete', id: sA }); await post({ op: 'ticketDelete', id: sB });
 const benCookie = await login('22222222');
-assert.equal((await bk('POST', { action: 'restore', name: bl.backups[0].name }, benCookie)).status, 403, 'foremen cannot restore');
+assert.equal((await bk('POST', { action: 'restore', name: bl.backups[0].name }, benCookie)).status, 403, 'editors cannot restore');
 assert.equal((await bk('POST', { action: 'restore', name: '../db/board.json' })).status, 400);
 const rs = await bk('POST', { action: 'restore', name: bl.backups[0].name });
 assert.equal(Object.keys(rs.board.tickets).length, countBefore, 'restore brings deleted tickets back');

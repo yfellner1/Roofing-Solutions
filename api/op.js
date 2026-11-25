@@ -1,4 +1,4 @@
-import { json, getUser, mutate, readDb, getSettings, PEOPLE, TYPES, STATUSES, uid, str, addActivity, removeBlob } from './_lib.js';
+import { json, getAuth, mutate, readDb, getSettings, PEOPLE, TYPES, STATUSES, uid, str, addActivity, removeBlob } from './_lib.js';
 import { ticketOp, advanceFromTask, setNotify, dayStops, recordText } from './_tickets.js';
 import { geocode, planOrder, driveRoute } from './_geo.js';
 import { sendPush } from './_push.js';
@@ -76,11 +76,14 @@ function cleanTask(d) {
 
 export default {
   async fetch(request) {
-    const by = getUser(request);
-    if (!by) return json({ error: 'Sign in required' }, 401);
+    const me = await getAuth(request);
+    if (!me) return json({ error: 'Sign in required' }, 401);
+    const by = me.name, admin = me.role === 'admin';
     if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
     let b;
     try { b = await request.json(); } catch { return json({ error: 'Bad request' }, 400); }
+    // Editors do the everyday work; settings and deleting tickets or customers are for admins.
+    if (!admin && ['settings', 'ticketDelete', 'customerDelete'].includes(b.op)) return json({ error: 'Only an admin can do that.' }, 403);
     const blobsToDelete = [];
     const notify = [];
     const tell = (to, title, body) => { if (to && to !== by) notify.push({ to, title, body }); };
@@ -137,6 +140,7 @@ export default {
           }
           case 'delete': {
             if (!db.tasks[b.id]) return { id: b.id };
+            if (!admin && db.tasks[b.id].createdBy !== by) return { error: 'Only an admin or the person who created this task can delete it.' };
             delete db.tasks[b.id];
             for (const [nid, n] of Object.entries(db.notes)) if (n.taskId === b.id) delete db.notes[nid];
             for (const [pid, p] of Object.entries(db.photos)) if (p.taskId === b.id) { blobsToDelete.push(p.path); delete db.photos[pid]; }

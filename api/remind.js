@@ -32,7 +32,7 @@ export default {
       return json({ ok: true, for: tomorrow, sent, failed: Object.keys(results).length - sent });
     }
 
-    const by = getUser(request);
+    const by = await getUser(request);
     if (!by) return json({ error: 'Sign in required' }, 401);
     if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
     let b = {};

@@ -14,7 +14,7 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 
 ## Files
 - `api/_lib.js`  — shared: people list, sign-in cookie signing, `readDb`, `mutate` (read-modify-write with ifMatch etag guard + fallback so saves never lock up).
-- `api/auth.js`  — POST code → sets `rs_user` cookie; GET → who am I; DELETE → sign out.
+- `api/auth.js`  — POST username + password → sets `rs_user` cookie; GET → who am I (+ role, people list); DELETE → sign out.
 - `api/board.js` — GET full board (signed-in only).
 - `api/op.js`    — all writes: create, update, status, note, delete, removePhoto. Author always comes from the cookie, never the request body.
 - `api/photo.js` — POST upload (client compresses to JPEG first), GET streams a private photo.
@@ -45,18 +45,18 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 - Other customer texts: "on my way" and "thank you" (`kind` on `/api/remind` POST, logged in `ticket.texts`). `settings.autoThanks` sends the thank-you when a job is marked paid (Twilio only).
 - Reminders: cron runs 23:00 UTC (6pm EST / 7pm EDT) and texts customers on tomorrow's schedule (`BUSINESS_TZ`), once per date. Without Twilio env vars the UI falls back to an `sms:` link on the user's own phone.
 
-## Auth model
-- Each person has their own 8-digit code in env var `USER_PINS` (JSON name → code). Names must match `PEOPLE` in `api/_lib.js` and the `PEOPLE` array in `index.html`.
-- Cookie = base64url(name) + HMAC(AUTH_SECRET, name:code). Changing someone's code signs only them out.
-- Never commit real codes. Never trust a name sent from the browser.
-
-## Adding a person
-1. Add to `PEOPLE` in `api/_lib.js` and in `index.html` (name, role, avatar color).
-2. Add their code to `USER_PINS` in Vercel, then redeploy.
+## Accounts and roles
+- Each person signs in with a **username + password** (`api/auth.js`). Accounts live in `db/users.json` (`api/_users.js`), apart from the board, with scrypt password hashes; nothing in that file is ever sent to a browser except name, job title, colour and on/off.
+- Two roles: **admin** (everything, plus Users, Settings, restoring backups, deleting tickets/customers/any task) and **editor** (everyday work; may delete only tasks they created). Checks are server-side in `op.js`, `backup.js`, `users.js`; the UI just hides what an editor can't use.
+- Admins manage people in the app (account button → Manage users → `api/users.js`): add, rename, job title, role, "can sign in", set a new password. Guards: at least one active admin; you can't demote or switch off yourself. Everyone can change their own password.
+- Cookie = base64url(user id) + HMAC(AUTH_SECRET, id:stamp). The stamp changes on password change/reset and on/off, which signs that person out everywhere. 8 wrong passwords lock an account for 10 minutes.
+- `PEOPLE` (server) is the live list of active display names, refreshed from `users.json` on every request via `getAuth`. Work is stored by display name, so a rename rewrites assignee/author fields (`renameEverywhere` in `users.js`).
+- First run only: if `users.json` does not exist, the original six are created with usernames loriale, mayer, salcer, ben, klein, yehuda and their old 8-digit code from `USER_PINS` as the password (Loriale and Mayer are admins). After that `USER_PINS` is unused.
+- Job title Foreman or Crew = shown as a row in the week calendar and gets the "My stops" view.
 
 ## Develop / test / deploy
 - Server logic tests (no network, mocked Blob): `node test/run.mjs`
-- Safe local preview (in-memory, nothing saved): `node test/dev.mjs` → http://localhost:3000, codes 11111111 / 22222222 / 33333333. `FAKE_GEO=1` fakes map points.
+- Safe local preview (in-memory, nothing saved): `node test/dev.mjs` → http://localhost:3000, sign in as loriale / 11111111 (admin), ben / 22222222, mayer / 33333333. `FAKE_GEO=1` fakes map points.
 - Local run with real storage: `npm i -g vercel`, `vercel link` (team: reliable-os, project: roofing-solutions-tasks), `vercel env pull .env.local`, `vercel dev`.
   Note: local dev writes to the SAME live Blob store — use a test task and delete it.
 - Deploy: `vercel --prod` (or connect a GitHub repo to the project for auto-deploys).
@@ -67,4 +67,4 @@ foremen Ben, Mr. Klein, Yehuda. Live at https://roofing-solutions-tasks.vercel.a
 - Status columns: To do, In progress, Waiting on customer, Done. Task types and statuses are validated server-side in `api/op.js` — update both client and server lists together.
 
 ## Ideas the owner may ask for next
-Push/email notifications on assignment, recurring tasks, calendar drag-and-drop, customer-facing estimate PDFs, QuickBooks invoice sync, two-way texting (customer replies), per-crew logins that only show their day, a real database (Postgres) if the JSON file gets large, per-person permissions, export to CSV.
+Recurring tasks, touch drag-and-drop, customer-facing estimate PDFs, QuickBooks invoice sync, two-way texting (customer replies), a real database (Postgres) if the JSON file gets large, finer permissions (e.g. hide dollar amounts from crews), export to CSV.

@@ -69,7 +69,7 @@ async function photon(q, near) {
 
 export default {
   async fetch(request) {
-    if (!getUser(request)) return json({ error: 'Sign in required' }, 401);
+    if (!(await getUser(request))) return json({ error: 'Sign in required' }, 401);
     const url = new URL(request.url);
     const token = (url.searchParams.get('s') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 36);
     const id = (url.searchParams.get('id') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 300);

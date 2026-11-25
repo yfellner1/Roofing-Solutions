@@ -16,6 +16,7 @@ try {
     console.log('== etag mode:', MODE);
     console.log(execFileSync('node', ['test/server.test.mjs'], { cwd: root, env: { ...env, MODE } }).toString());
     console.log(execFileSync('node', ['test/tickets.test.mjs'], { cwd: root, env: { ...env, MODE } }).toString());
+    console.log(execFileSync('node', ['test/users.test.mjs'], { cwd: root, env: { ...env, MODE } }).toString());
   }
 } finally {
   rmSync(dest, { recursive: true, force: true });

@@ -1,4 +1,4 @@
-const CACHE = 'rs-tasks-v6';
+const CACHE = 'rs-tasks-v7';
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/logo.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

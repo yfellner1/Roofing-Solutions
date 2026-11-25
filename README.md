@@ -18,7 +18,7 @@ vercel --prod          # deploy
 ```
 node test/dev.mjs      # http://localhost:3000 – in-memory copy, nothing is saved, live data untouched
 ```
-Sign in with 11111111 (Loriale), 22222222 (Ben) or 33333333 (Mayer).
+Sign in as loriale / 11111111 (admin), ben / 22222222 or mayer / 33333333.
 
 ## Turning on automatic reminder texts (optional)
 1. Create a Twilio account, buy a local number, and complete Twilio's A2P 10DLC registration (US carriers require it for business texting).

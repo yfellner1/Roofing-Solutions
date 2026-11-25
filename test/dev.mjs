@@ -1,5 +1,5 @@
 // Local preview with NO real storage: everything lives in memory and is lost on exit.
-// Usage: node test/dev.mjs   → http://localhost:3000   (codes: 11111111 Loriale, 22222222 Ben, 33333333 Mayer)
+// Usage: node test/dev.mjs   → http://localhost:3000   (sign in: loriale / 11111111 (admin), ben / 22222222, mayer / 33333333)
 // FAKE_GEO=1 places addresses at made-up map points so routes work offline.
 import { mkdirSync, cpSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { createServer } from 'node:http';

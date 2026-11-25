@@ -27,6 +27,12 @@ export async function saveSub(name, sub) {
   await writeSubs(subs);
   return true;
 }
+export async function renameSubs(from, to) {
+  const subs = await readSubs();
+  let changed = false;
+  for (const v of Object.values(subs)) if (v.name === from) { v.name = to; changed = true; }
+  if (changed) await writeSubs(subs);
+}
 export async function removeSub(endpoint) {
   const subs = await readSubs();
   if (!subs[keyOf(endpoint)]) return;

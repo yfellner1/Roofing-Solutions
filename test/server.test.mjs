@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import auth from '../api/auth.js'; import op from '../api/op.js'; import board from '../api/board.js'; import photo from '../api/photo.js';
-const login = async (pin) => { const r = await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ pin }) })); return { status: r.status, body: await r.json(), cookie: (r.headers.get('set-cookie') || '').split(';')[0] }; };
+const NAMES = { 11111111: 'loriale', 22222222: 'ben', 33333333: 'mayer', 12345678: 'ben' };
+const login = async (pin) => { const r = await auth.fetch(new Request('https://x/api/auth', { method: 'POST', body: JSON.stringify({ username: NAMES[pin], password: pin }) })); return { status: r.status, body: await r.json(), cookie: (r.headers.get('set-cookie') || '').split(';')[0] }; };
 const post = (c, b) => op.fetch(new Request('https://x/api/op', { method: 'POST', headers: { cookie: c, 'content-type': 'application/json' }, body: JSON.stringify(b) })).then((r) => r.json());
 const L = await login('11111111'); assert.equal(L.body.name, 'Loriale');
 const B = await login('22222222'); assert.equal(B.body.name, 'Ben');

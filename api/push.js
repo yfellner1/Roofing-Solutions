@@ -5,7 +5,7 @@ import { pushConfigured, saveSub, removeSub } from './_push.js';
 
 export default {
   async fetch(request) {
-    const by = getUser(request);
+    const by = await getUser(request);
     if (!by) return json({ error: 'Sign in required' }, 401);
     if (request.method === 'GET') return json({ configured: pushConfigured(), key: process.env.VAPID_PUBLIC_KEY || '' });
     let b = {};

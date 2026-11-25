@@ -1,7 +1,8 @@
 import { get, put, del, head, list, BlobPreconditionFailedError, BlobNotFoundError } from '@vercel/blob';
 import crypto from 'node:crypto';
 
-export const PEOPLE = ['Loriale', 'Mayer', 'Mrs. Salcer', 'Ben', 'Mr. Klein', 'Yehuda'];
+import { PEOPLE, getAuth } from './_users.js';
+export { PEOPLE, getAuth };
 export const TYPES = ['schedule', 'estimate', 'estfollow', 'invoice', 'check', 'followup', 'deposit', 'other'];
 export const TRADES = ['roof', 'gutters', 'siding'];
 export const TICKET_KINDS = { estimate: 'Estimate', repair: 'Repair', installation: 'Installation' };
@@ -15,8 +16,7 @@ export const DEFAULT_OMW = 'Hi {first}, this is Roofing Solutions. Our crew is o
 export const DEFAULT_THANKS = 'Hi {first}, thank you for choosing Roofing Solutions! We appreciate your business. {review}';
 const SETTINGS = { shopAddress: '', shopLat: null, shopLng: null, companyPhone: '', smsTemplate: DEFAULT_SMS, autoSms: true, skipDays: [], autoTasks: true, officeAssignee: 'Loriale',
   omwTemplate: DEFAULT_OMW, thanksTemplate: DEFAULT_THANKS, reviewLink: '', autoThanks: false };
-// People allowed to restore a backup.
-export const ADMINS = ['Mayer', 'Loriale'];
+
 export const getSettings = (db) => ({ ...SETTINGS, ...(db.settings || {}) });
 
 // Dates are plain YYYY-MM-DD strings in the business's own time zone.
@@ -34,38 +34,10 @@ export const json = (data, status = 200, headers = {}) =>
     headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...headers },
   });
 
-function users() {
-  try { return JSON.parse(process.env.USER_PINS || '{}'); } catch { return {}; }
-}
-function sign(name, pin) {
-  return crypto.createHmac('sha256', process.env.AUTH_SECRET || 'rs').update(name + ':' + pin).digest('hex');
-}
-function same(a, b) {
-  const x = crypto.createHash('sha256').update(String(a)).digest();
-  const y = crypto.createHash('sha256').update(String(b)).digest();
-  return crypto.timingSafeEqual(x, y);
-}
-// Returns the person a code belongs to, or '' if it matches nobody.
-export function userForPin(pin) {
-  let found = '';
-  for (const [name, p] of Object.entries(users())) {
-    if (PEOPLE.includes(name) && p && same(pin, p)) found = name;
-  }
-  return found;
-}
-export function cookieFor(name) {
-  const pin = users()[name];
-  return Buffer.from(name).toString('base64url') + '.' + sign(name, pin);
-}
-// Returns the signed-in person's name, or '' if not signed in.
-export function getUser(request) {
-  const m = (request.headers.get('cookie') || '').match(/(?:^|;\s*)rs_user=([A-Za-z0-9_-]+)\.([a-f0-9]{64})/);
-  if (!m) return '';
-  let name = '';
-  try { name = Buffer.from(m[1], 'base64url').toString('utf8'); } catch { return ''; }
-  const pin = users()[name];
-  if (!PEOPLE.includes(name) || !pin) return '';
-  return same(m[2], sign(name, pin)) ? name : '';
+// Returns the signed-in person's name, or '' if not signed in. (getAuth also gives their role.)
+export async function getUser(request) {
+  const a = await getAuth(request);
+  return a ? a.name : '';
 }
 
 const empty = () => ({ seq: 0, tseq: 0, tasks: {}, notes: {}, photos: {}, customers: {}, tickets: {}, settings: {} });

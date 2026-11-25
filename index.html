@@ -252,6 +252,8 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .login-card p{color:var(--ink-2);margin:0 0 18px}
 .login-card input{width:100%;text-align:center;font-size:22px;letter-spacing:4px;padding:12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--surface);margin-bottom:12px}
 .login-card .btn{width:100%;min-height:48px;font-size:16px}
+.login-card input{font-size:17px;letter-spacing:0;text-align:left}
+.login-lab{display:block;text-align:left;font-weight:600;font-size:14px;margin-bottom:6px}
 .login-card .err{margin-top:10px}
 .who-card{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--line-2);border-radius:10px}
 .who-card .av{width:36px;height:36px;font-size:13px}
@@ -703,6 +705,7 @@ a.btn.primary{color:var(--red-ink)}
   <div class="sheet-body">
     <p style="margin:0 0 14px;color:var(--ink-2)">You're signed in as:</p>
     <div class="who-grid" id="whoGrid"></div>
+    <div id="acctBox"></div>
     <div id="pushBox"></div>
     <p style="margin:20px 0 0;text-align:center"><button class="btn ghost" id="signOut" type="button" style="color:var(--muted)">Sign out of this device</button></p>
   </div>
@@ -716,9 +719,11 @@ a.btn.primary{color:var(--red-ink)}
   <form class="login-card" id="loginForm">
     <img src="/logo.png" alt="Roofing Solutions LLC">
     <h1>Office Board</h1>
-    <p>Enter your personal code to sign in.</p>
-    <label class="sr" for="pin">Personal code</label>
-    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••••••">
+    <p>Sign in with your username and password.</p>
+    <label class="login-lab" for="uname">Username</label>
+    <input id="uname" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <label class="login-lab" for="pin">Password</label>
+    <input id="pin" type="password" autocomplete="current-password">
     <button class="btn primary" id="loginBtn" type="submit">Sign in</button>
     <div class="err" id="loginErr" role="alert"></div>
   </form>
@@ -740,14 +745,10 @@ a.btn.primary{color:var(--red-ink)}
 <script>
 (function(){
 "use strict";
-const PEOPLE=[
-  {name:"Loriale",role:"Office staff",color:"#A8252B"},
-  {name:"Mayer",role:"Owner",color:"#1F2326"},
-  {name:"Mrs. Salcer",role:"Bookkeeper",color:"#6B4E9B"},
-  {name:"Ben",role:"Foreman",color:"#2D6A8E"},
-  {name:"Mr. Klein",role:"Foreman",color:"#5C6B2E"},
-  {name:"Yehuda",role:"Foreman",color:"#B4540A"}
-];
+// Everyone with an account comes from the server (see setPeople). PEOPLE = those who can be given work.
+let PEOPLE=[],ALLP=[],myRole="",peopleKey="";
+const isAdmin=()=>myRole==="admin";
+const isField=p=>p.role==="Foreman"||p.role==="Crew";
 const TYPES=[
   {id:"schedule",label:"Schedule job / create ticket"},
   {id:"estimate",label:"Send estimate",amount:true},
@@ -767,7 +768,7 @@ const STATUSES=[
 const TRADE_LABEL={roof:"Roof",siding:"Siding",gutters:"Gutters"};
 const $=s=>document.querySelector(s);
 const el=(tag,attrs,...kids)=>{const n=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v==null||v===false)continue;if(k==="class")n.className=v;else if(k.startsWith("on"))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v===true?"":v)}for(const c of kids){if(c==null||c===false)continue;n.append(c.nodeType?c:String(c))}return n};
-const person=n=>PEOPLE.find(p=>p.name===n)||{name:n||"Unassigned",role:"",color:"#959CA3"};
+const person=n=>ALLP.find(p=>p.name===n)||{name:n||"Unassigned",role:"",color:"#959CA3"};
 const initials=n=>(n||"?").replace(/^(Mr|Mrs|Ms)\.\s*/,"").split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 const av=n=>{const p=person(n);return el("span",{class:"av",style:"background:"+p.color,title:p.name,"aria-hidden":"true"},initials(p.name))};
 const typeLabel=id=>(TYPES.find(t=>t.id===id)||{label:"Task"}).label;
@@ -792,6 +793,7 @@ function applyBoard(b){
   tasks=Object.entries(b.tasks||{}).map(([id,t])=>Object.assign({id},t));
   notes=Object.entries(b.notes||{}).map(([id,n])=>Object.assign({id},n));
   photos=Object.entries(b.photos||{}).map(([id,p])=>Object.assign({id},p));
+  if(b.people)setPeople(b.people);
   tickets=Object.entries(b.tickets||{}).map(([id,t])=>Object.assign({id},t));
   customers=Object.entries(b.customers||{}).map(([id,c])=>Object.assign({id},c));
   settings=b.settings||{};
@@ -817,22 +819,32 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("online",()=>{notice("");refresh()});
 
 // ---------- login ----------
-function showLogin(){authed=false;$("#login").hidden=false;setTimeout(()=>$("#pin").focus(),50)}
+function showLogin(){authed=false;$("#login").hidden=false;setTimeout(()=>$($("#uname").value?"#pin":"#uname").focus(),50)}
+function onAuth(d){authed=true;me=d.name||"";myRole=d.role||"";smsReady=!!d.sms;if(d.people)setPeople(d.people);$("#settingsBtn").hidden=!isAdmin();renderMe()}
+// Rebuilds the people pick-lists, keeping whatever is selected.
+function setPeople(list){
+  const key=JSON.stringify(list);if(key===peopleKey)return;peopleKey=key;
+  ALLP=list.map(p=>({name:p.name,role:p.title||"",color:p.color,active:p.active}));PEOPLE=ALLP.filter(p=>p.active);
+  for(const [id,long] of [["#fWho",0],["#iAssignee",1],["#jWho",0],["#sCrew",0],["#tAssignee",1]]){
+    const n=$(id),v=n.value;while(n.options.length>1)n.remove(1);
+    for(const p of PEOPLE)n.append(el("option",{value:p.name},long&&p.role?p.name+" – "+p.role:p.name));
+    n.value=[...n.options].some(o=>o.value===v)?v:"";
+  }
+}
 $("#loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();const pin=$("#pin").value.trim();if(!pin)return;
+  e.preventDefault();const pin=$("#pin").value,username=$("#uname").value.trim();if(!pin||!username){$("#loginErr").textContent="Enter your username and password.";return}
   $("#loginBtn").disabled=true;$("#loginErr").textContent="";
   try{
-    const r=await fetch("/api/auth",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({pin})});
+    const r=await fetch("/api/auth",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({username,password:pin})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){$("#loginErr").textContent=d.error||"Couldn't sign in. Try again.";}
-    else{authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();$("#login").hidden=true;$("#pin").value="";await refresh();initPushHint()}
+    else{onAuth(d);$("#login").hidden=true;$("#pin").value="";await refresh();initPushHint()}
   }catch(err){$("#loginErr").textContent="No connection. Check your internet and try again."}
   $("#loginBtn").disabled=false;
 });
-async function signOut(){await disablePush();await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";tasks=[];notes=[];photos=[];tickets=[];customers=[];closeWho();renderMe();render();showLogin()}
+async function signOut(){await disablePush();await fetch("/api/auth",{method:"DELETE",credentials:"same-origin"}).catch(()=>{});me="";myRole="";tasks=[];notes=[];photos=[];tickets=[];customers=[];closeWho();renderMe();render();showLogin()}
 
 // ---------- selects ----------
-for(const p of PEOPLE){$("#fWho").append(el("option",{value:p.name},p.name));$("#iAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
 $("#iType").append(el("option",{value:""},"Choose a task type"));
 for(const t of TYPES){$("#fType").append(el("option",{value:t.id},t.label));$("#iType").append(el("option",{value:t.id},t.label))}
 
@@ -841,13 +853,13 @@ function renderMe(){$("#meBtn").replaceChildren(av(me||"?"),el("span",null,me||"
 function openWho(){
   const g=$("#whoGrid");g.replaceChildren();
   const p=person(me);
-  g.append(el("div",{class:"who-card"},av(me),el("span",null,el("b",null,me),el("small",null,p.role))));
-  renderPushBox();
+  g.append(el("div",{class:"who-card"},av(me),el("span",null,el("b",null,me),el("small",null,[p.role,ROLE_LABEL[myRole]].filter(Boolean).join(" · ")))));
+  renderAccountBox();renderPushBox();
   $("#ovWho").classList.add("open");$("#who").classList.add("open");
 }
 function closeWho(){$("#ovWho").classList.remove("open");$("#who").classList.remove("open")}
 $("#meBtn").onclick=()=>{if(me)openWho();else showLogin()};$("#ovWho").onclick=closeWho;$("#whoClose").onclick=closeWho;
-$("#signOut").onclick=()=>{if(confirm("Sign out of the board on this device? You'll need your code to get back in."))signOut()};
+$("#signOut").onclick=()=>{if(confirm("Sign out of the board on this device? You'll need your username and password to get back in."))signOut()};
 
 // ---------- install ----------
 let deferredPrompt=null;
@@ -981,7 +993,7 @@ function renderDetail(){
     else list.append(el("div",{class:"note"},av(n.by),el("div",{class:"note-b"},el("div",{class:"note-h"},el("b",null,n.by),el("time",null,fmtStamp(n.at))),el("div",{class:"note-t"},n.text))));
   }
   nodes.push(el("div",{class:"sec"},"Notes & updates",el("span",{class:"n"},String(ns.filter(n=>n.kind!=="activity").length))),list);
-  nodes.push(el("div",{style:"margin-top:28px"},el("button",{class:"btn danger",type:"button",onclick:()=>deleteTask(t)},"Delete task")));
+  if(isAdmin()||t.createdBy===me)nodes.push(el("div",{style:"margin-top:28px"},el("button",{class:"btn danger",type:"button",onclick:()=>deleteTask(t)},"Delete task")));
   const sc=b.scrollTop;b.replaceChildren(...nodes);b.scrollTop=sc;
 }
 function photoTile(p){
@@ -1051,7 +1063,7 @@ function openForm(t,pre){
   const lk=tickets.find(k=>k.id===formTicketId);
   $("#fLink").hidden=!lk;
   if(lk)$("#fLink").replaceChildren("Linked to ticket ",el("b",null,tnum(lk)+" · "+cust(lk.customerId).name),"  ",el("button",{type:"button",class:"linkbtn",onclick:()=>{formTicketId="";$("#fLink").hidden=true}},"Remove link"));
-  $("#fTitle").textContent=editingId?"Edit task #"+t.number:"New task";$("#fSave").textContent=editingId?"Save changes":"Create task";$("#fDelete").hidden=!editingId;
+  $("#fTitle").textContent=editingId?"Edit task #"+t.number:"New task";$("#fSave").textContent=editingId?"Save changes":"Create task";$("#fDelete").hidden=!editingId||!(isAdmin()||t.createdBy===me);
   document.querySelectorAll('input[name="trade"]').forEach(i=>i.checked=t?(t.trades||[]).includes(i.value):false);
   $("#iType").value=t?t.type||"":"";$("#iAssignee").value=t?t.assignee||"":"";
   setRadio("kind",t?t.kind||"":"");setRadio("dep",t?t.deposit||"":"");setRadio("depPaid",t?t.depositPaid||"":"");setRadio("colorSt",t?t.colorStatus||"":"");
@@ -1123,7 +1135,6 @@ let tickets=[],customers=[],settings={},smsReady=false;
 const jv={main:"today",cal:["week","month"].includes(ls.get("rs_cal"))?ls.get("rs_cal"):"day",sub:["tickets","schedule","customers","lost"].includes(ls.get("rs_sub"))?ls.get("rs_sub"):"tickets",pipe:ls.get("rs_pipe")==="est"?"est":"jobs",q:"",trade:"",who:"",tab:"ticket",day:ymd(new Date()),crew:"",cq:""};
 let tEditing=null,tCustId="",tFromTask="",formTicketId="";
 
-for(const p of PEOPLE){for(const s of ["#jWho","#sCrew"])$(s).append(el("option",{value:p.name},p.name));$("#tAssignee").append(el("option",{value:p.name},p.name+" – "+p.role))}
 
 // ---------- navigation ----------
 function setMain(m){
@@ -1340,7 +1351,7 @@ function renderWeekGrid(){
   for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(d)}
   const keys=days.map(ymd),inWeek=tickets.filter(t=>t.date>=keys[0]&&t.date<=keys[6]&&t.stage!=="lost");
   $("#calTitle").textContent=days[0].toLocaleDateString(undefined,{month:"short",day:"numeric"})+" – "+days[6].toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+inWeek.filter(t=>!jv.crew||t.assignee===jv.crew).length+" stops";
-  const names=PEOPLE.filter(p=>jv.crew?p.name===jv.crew:(p.role==="Foreman"||inWeek.some(t=>t.assignee===p.name))).map(p=>p.name);
+  const names=PEOPLE.filter(p=>jv.crew?p.name===jv.crew:(isField(p)||inWeek.some(t=>t.assignee===p.name))).map(p=>p.name);
   if(!jv.crew)names.push("");
   const g=el("div",{class:"wk"},el("div",{class:"wk-h"}));
   days.forEach((d,i)=>g.append(el("div",{class:"wk-h"+(keys[i]===tday?" today":"")},el("button",{type:"button",title:"Open this day",onclick:()=>{jv.day=keys[i];jv.cal="day";renderJobs()}},d.toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"})))));
@@ -1465,7 +1476,7 @@ function openCustomerForm(c){
   const n=inp("mcName","text",c&&c.name),p=inp("mcPhone","tel",c&&c.phone),e=inp("mcEmail","email",c&&c.email),a=inp("mcAddr","text",c&&c.address,{placeholder:"Street, town, state, ZIP"}),no=area("mcNotes",c&&c.notes,"Gate codes, dogs, preferences, who to ask for…");
   const ok=chk("mcSms","OK to text this customer",!c||c.smsOk!==false),err=el("div",{class:"err",role:"alert"});
   openMini(c?"Edit customer":"New customer",[fld("Name",n),el("div",{class:"grid2"},fld("Mobile phone",p),fld("Email",e)),addrField("Address",a),fld("Notes",no),ok,err],
-    [c&&!tickets.some(t=>t.customerId===c.id)?btn("Delete","danger",async()=>{if(!confirm("Delete "+c.name+"?"))return;await op({op:"customerDelete",id:c.id});closeMini();closeDetail()}):null,
+    [c&&isAdmin()&&!tickets.some(t=>t.customerId===c.id)?btn("Delete","danger",async()=>{if(!confirm("Delete "+c.name+"?"))return;await op({op:"customerDelete",id:c.id});closeMini();closeDetail()}):null,
      btn("Cancel","",closeMini),
      btn(c?"Save changes":"Save customer","primary",async()=>{if(!n.value.trim()){err.textContent="Enter the customer's name.";return}
        const r=await op({op:"customerSave",id:c?c.id:"",data:{name:n.value,phone:p.value,email:e.value,address:a.value,notes:no.value,smsOk:ok.querySelector("input").checked}});closeMini();toast("Customer saved");if(!c&&r.id)openCustomer(r.id)})]);
@@ -1560,7 +1571,7 @@ function renderTicketDetail(){
   tl.append(el("button",{type:"button",class:"btn",style:"align-self:flex-start",onclick:()=>openForm(null,{ticket:t})},"+ Add a task for this ticket"));
   nodes.push(el("div",{class:"sec"},"Office tasks",el("span",{class:"n"},String(linked.length))),tl);
   nodes.push(...photoAndNoteNodes(t.id));
-  nodes.push(el("div",{style:"margin-top:28px"},el("button",{class:"btn danger",type:"button",onclick:()=>deleteTicket(t)},"Delete ticket")));
+  if(isAdmin())nodes.push(el("div",{style:"margin-top:28px"},el("button",{class:"btn danger",type:"button",onclick:()=>deleteTicket(t)},"Delete ticket")));
   setDrawer("Ticket "+tnum(t),true,true,nodes);
 }
 function photoAndNoteNodes(id){
@@ -1764,7 +1775,7 @@ function renderToday(){
     tile(myTasks.length,"My open tasks",late?late+" overdue":"None overdue",late>0,go("tasks",()=>{view.mine=true;$("#mineBtn").setAttribute("aria-pressed","true")})));
   // left column: my stops, then the whole day
   const left=el("div",{class:"today-col"});
-  if(mine.length||p.role==="Foreman"){
+  if(mine.length||isField(p)){
     const box=el("div",{class:"today-col",style:"gap:10px"});
     const todo=mine.filter(t=>t.stage==="scheduled"),urls=mapsUrls(todo);
     box.append(el("div",{class:"panel-head",style:"margin:0"},el("h2",null,(isToday?"My stops today":"My stops tomorrow")+" · "+todo.length+" to go"),
@@ -1774,7 +1785,7 @@ function renderToday(){
     left.append(box);
   }
   const others=all.filter(t=>t.assignee!==me);
-  if(others.length||!mine.length&&p.role!=="Foreman"){
+  if(others.length||!mine.length&&!isField(p)){
     const list=el("div",{class:"rowlist flush"});
     if(!others.length)list.append(el("div",{class:"empty"},loadedOnce?"Nothing scheduled "+(isToday?"today":"tomorrow")+" yet.":"Loading…"));
     for(const t of others){const c=cust(t.customerId),done=t.stage!=="scheduled";
@@ -1876,6 +1887,65 @@ function openRestore(list){
     [btn("Cancel","",closeMini),btn("Restore","primary",async()=>{if(!confirm("Replace the whole board with this backup?"))return;const r=await api("/api/backup",jsonPost("POST",{action:"restore",name:pick.value}));applyBoard(r.board);closeMini();toast("Board restored")})]);
 }
 
+// ---------- accounts: change my password, manage users (admins) ----------
+const ROLE_LABEL={admin:"Admin",editor:"Editor"};
+const ROLE_HELP={admin:"Everything, plus users, settings, restoring backups and deleting tickets or customers.",editor:"Everyday work: tasks, tickets, schedule, notes, photos and customer texts."};
+const USER_TITLES=["Owner","Office staff","Bookkeeper","Foreman","Crew","Other"];
+const pwInput=(id,auto)=>inp(id,"password","",{autocomplete:auto});
+function renderAccountBox(){
+  const box=$("#acctBox");
+  const cur=pwInput("pwCur","current-password"),nw=pwInput("pwNew","new-password"),again=pwInput("pwAgain","new-password"),msg=el("div",{class:"err",role:"alert"});
+  const form=el("div",{hidden:true,style:"margin-top:12px"},fld("Current password",cur),fld("New password",nw,"(at least 8 characters)"),fld("New password again",again),msg,
+    btn("Save new password","primary",async()=>{
+      msg.style.color="";msg.textContent="";
+      if(nw.value!==again.value){msg.textContent="The two new passwords don't match.";return}
+      try{await api("/api/users",jsonPost("POST",{action:"password",current:cur.value,password:nw.value}));cur.value=nw.value=again.value="";form.hidden=true;toast("Password changed")}
+      catch(e){msg.textContent=e.message||"Couldn't change your password."}
+    }));
+  box.replaceChildren(el("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"},
+    el("button",{type:"button",class:"btn",onclick:()=>{form.hidden=!form.hidden;if(!form.hidden)cur.focus()}},"Change my password"),
+    isAdmin()?el("button",{type:"button",class:"btn",onclick:()=>{closeWho();openUsers()}},"Manage users"):null),form);
+}
+const roleField=(id,val)=>{const s=sel(id,[["editor","Editor"],["admin","Admin"]],val||"editor");
+  return el("div",{class:"field"},el("label",{for:id},"Role"),s,el("span",{class:"hint"},el("b",null,"Admin: "),ROLE_HELP.admin),el("span",{class:"hint"},el("b",null,"Editor: "),ROLE_HELP.editor))};
+async function openUsers(flash){
+  let d;try{d=await api("/api/users")}catch(e){return}
+  const list=el("div",{class:"rowlist flush"});
+  for(const u of d.users)list.append(el("div",{class:"row"+(u.active?"":" done")},
+    el("button",{type:"button",class:"grow",onclick:()=>openUserEdit(u)},el("b",null,u.name),el("small",null,"Username: "+u.username+(u.title?" · "+u.title:""))),
+    el("div",{class:"side"},u.active?null:el("span",{class:"chip flag"},"Can't sign in"),el("span",{class:"chip "+(u.role==="admin"?"kind":"muted")},ROLE_LABEL[u.role]))));
+  openMini("Users",[flash?el("div",{class:"linkline",role:"status"},flash):null,
+    el("p",{class:"panel-note"},"Everyone who can sign in to the board. Tap a person to change their role, switch their sign-in off, or set a new password."),list],
+    [btn("Close","",closeMini),btn("+ Add a person","primary",()=>openUserAdd())]);
+}
+function openUserAdd(){
+  const n=inp("uName","text",""),un=inp("uUser","text","",{autocapitalize:"none",autocomplete:"off",spellcheck:"false"}),pw=inp("uPw","text","",{autocomplete:"off"}),
+    title=sel("uTitle",USER_TITLES.map(t=>[t,t]),"Other"),role=roleField("uRole"),err=el("div",{class:"err",role:"alert"});
+  n.addEventListener("input",()=>{if(!un.dataset.touched)un.value=n.value.trim().toLowerCase().replace(/^(mr|mrs|ms)\.?\s+/,"").replace(/[^a-z0-9]+/g,"").slice(0,20)});
+  un.addEventListener("input",()=>{un.dataset.touched="1"});
+  openMini("Add a person",[el("div",{class:"grid2"},fld("Name",n,"(as shown on the board)"),fld("Username",un,"(what they type to sign in)")),
+    fld("Job",title),role,fld("Password",pw,"– at least 8 characters. Give it to them directly; they can change it under their account."),err],
+    [btn("Back","",()=>openUsers()),btn("Add person","primary",async()=>{
+      try{const r=await api("/api/users",jsonPost("POST",{action:"add",name:n.value,username:un.value,title:title.value,role:role.querySelector("select").value,password:pw.value}));await refresh();openUsers(r.message)}
+      catch(e){err.textContent=e.message||"Couldn't add them."}})]);
+}
+function openUserEdit(u){
+  const self=u.name===me;
+  const n=inp("uName","text",u.name),title=sel("uTitle",USER_TITLES.map(t=>[t,t]),u.title||"Other"),role=roleField("uRole",u.role),
+    act=chk("uActive","Can sign in",u.active),pw=inp("uPw","text","",{autocomplete:"off",placeholder:"Leave blank to keep their password"}),err=el("div",{class:"err",role:"alert"});
+  if(self){act.querySelector("input").disabled=true;role.querySelector("select").disabled=true}
+  openMini(u.name,[el("p",{class:"panel-note"},"Username: "+u.username+(self?" · this is you – you can't switch off your own account or remove your own admin access.":"")),
+    el("div",{class:"grid2"},fld("Name",n),fld("Job",title)),role,act,
+    fld("Set a new password",pw,"– optional. It signs them out everywhere."),err],
+    [btn("Back","",()=>openUsers()),btn("Save changes","primary",async()=>{
+      try{
+        await api("/api/users",jsonPost("POST",{action:"update",id:u.id,name:n.value,title:title.value,role:role.querySelector("select").value,active:act.querySelector("input").checked}));
+        let msg="Saved "+n.value.trim()+".";
+        if(pw.value){const r=await api("/api/users",jsonPost("POST",{action:"reset",id:u.id,password:pw.value}));msg=r.message}
+        await refresh();openUsers(msg);
+      }catch(e){err.textContent=e.message||"Couldn't save."}})]);
+}
+
 // ---------- boot ----------
 async function initPushHint(){
   if(!pushOK()||Notification.permission!=="default"||ls.get("rs_nopush"))return;
@@ -1885,7 +1955,7 @@ renderMe();setMain(jv.main);
 (async()=>{
   try{
     const r=await fetch("/api/auth",{credentials:"same-origin",cache:"no-store"});const d=await r.json();
-    if(d.ok){authed=true;me=d.name||"";smsReady=!!d.sms;renderMe();await refresh();initPushHint()}else showLogin();
+    if(d.ok){onAuth(d);await refresh();initPushHint()}else showLogin();
   }catch(e){notice("You're offline. Connect to the internet to load the board.")}
 })();
 })();
